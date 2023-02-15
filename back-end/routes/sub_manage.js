@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const pageSchema = require('../MongoStuff/Objects/subgreddiit')
 const jwt = require('jsonwebtoken') 
 const userSchema = require('../MongoStuff/Objects/user')
+const postSchema = require('../MongoStuff/Objects/post')
+const statSchema = require('../MongoStuff/Objects/stats')
 
 require('dotenv').config() 
 
@@ -15,6 +17,10 @@ router.use(express.json())
 const gr = mongoose.model("Greddiits",pageSchema) 
 
 const user = mongoose.model("User",userSchema) 
+
+const post = mongoose.model("Posts",postSchema)
+
+const stat = mongoose.model("Stats",statSchema) 
 
 
 // aUTHENTICATE TOKEN
@@ -82,6 +88,14 @@ const create = async (req , email)=>{
     })
 
     const result = await newmodel.save()
+
+    const newstat = new stat({
+        name: req.body.name, 
+        dateOfCreation: new Date(),
+        followers: [email],
+    })
+
+    await newstat.save() 
 
     return result._id
 }
@@ -152,7 +166,10 @@ const HandleUsernames = async (req,res)=>{
                     moderators:data.moderators.length,
                     posts:data.posts.length, 
                     createdate:data.createdOn, 
-                    image:data.profileImageURL
+                    image:data.profileImageURL,
+                    bannedKeywords:data.bannedKeywords, 
+                    banned:data.banned,
+                    desc:data.description
                 })
             
         }
@@ -338,6 +355,39 @@ const Accept = (req,res)=>{
             reason:reason, 
             email:email
         }),1) 
+        stat.find({
+            name: name,
+        }).then((val) => {
+            const date = new Date() 
+            const req = val.filter((e) => {
+                let dateit = new Date(e.dateOfCreation)
+                return dateit.getFullYear() === date.getFullYear() && dateit.getMonth() === date.getMonth() && dateit.getDate() === date.getDate()
+            })
+            if (req.length === 0) {
+                 
+                const lmao = new stat({
+                    name: name,
+                    dateOfCreation: date,
+                })
+    
+                lmao.save()
+            }
+            else 
+            {
+                console.log("ans: ",req[0]) 
+                let ans = req[0] 
+
+                if(!ans.followers.includes(email))
+                {
+                    ans.followers.push(email) 
+                }
+    
+                console.log("done adding") 
+            }
+    
+        }).catch((err) => {
+            console.log("ERROR BRO: ", err)
+        })
 
         val.save().then(()=>{
 
@@ -420,7 +470,42 @@ const UnHandleFollow = async (req,res)=>{
 
             val.followers.splice(val.followers.indexOf(email),1)  
 
+            val.banned.push(email) 
             val.save().then(()=>{
+                stat.find({
+                    name: name,
+                }).then((valit) => {
+                    const date = new Date() 
+                    const req = valit.filter((e) => {
+                        let dateit = new Date(e.dateOfCreation)
+                        return dateit.getFullYear() === date.getFullYear() && dateit.getMonth() === date.getMonth() && dateit.getDate() === date.getDate()
+                    })
+                    if (req.length === 0) {
+                         
+                        const lmao = new stat({
+                            name: name,
+                            dateOfCreation: date,
+                        })
+            
+                        lmao.save()
+                    }
+                    else 
+                    {
+                        console.log("ans: ",req[0]) 
+                        let ans = req[0] 
+        
+                        if(ans.followers.includes(email))
+                        {
+                            ans.followers.splice(ans.followers.indexOf(email),1) 
+                        }
+            
+                        console.log("done adding") 
+                    }
+            
+                }).catch((err) => {
+                    console.log("ERROR BRO: ", err)
+                })
+        
                 res.send({
                     added:'YES',
                 })
@@ -585,6 +670,26 @@ const HandleDelete = async (req,res)=>{
             })
         
     }
+    for(let i = 0 ; i < node.posts.length ; i++)
+    {
+        let id = node.posts[i]
+
+        user.find({
+            savedPosts:id, 
+        }).then((val)=>{
+            val.forEach((e)=>{
+                e.savedPosts.splice(e.savedPosts.indexOf(id),1) 
+                e.save()
+            })
+        }).catch((err)=>{
+            console.log("Error") 
+        })
+        let res = await post.findByIdAndRemove(id) 
+
+        // console.log("Res: ",res) 
+    }
+
+
     }
 
     loopasync().then(()=>{
@@ -618,16 +723,37 @@ router.route('/delete').post((req,res,next)=>{
 router.route('/search').post((req,res,next)=>{
     const search = req.body.search 
 
+    const listtag = req.body.list
     gr.find({
         name:{
             $regex: search, 
             $options: 'i',
-        }
+        },
     }).then((val)=>{
+        let updated = []
 
+        if(listtag.length === 0)
+        {
+            res.send({
+                list:val,
+            })
+        }
+        else 
+        {
+            for(let i = 0 ; i <val.length ; i++)
+        {
+            console.log("truth value :" ,listtag.every(e=> val[i].tags.includes(e)))
+            if(listtag.every(e=> val[i].tags.includes(e)))
+            {
+                updated.push(val[i])  
+            }
+        }
+        console.log("val: ",updated) 
         res.send({
-            list:val,
+            list:updated,
         })
+        }
+        
 
     }).catch((err)=>{
         console.log("ERROR") 
@@ -637,4 +763,184 @@ router.route('/search').post((req,res,next)=>{
     })
 })
 
+// GET THE USERNAMES AND PROFILE IMAGES OF THE PEOPLE 
+// Function to update the values
+const HandleReport = async (req,res)=>{
+    const list1 = req.body.list1 
+
+    let output = []
+    
+    const loopsasync = async () => {
+         
+        for(let i = 0 ; i < list1.length ; i++)
+        {
+            let ele = list1[i].reportedBy 
+            let ele2 = list1[i].reported
+            let data = await user.findOne({
+                email:ele
+            })
+
+            let data2 = await user.findOne({
+                email:ele2
+            })
+
+            if(data != null)
+            {
+                output.push({
+                    usernamereporter: data.username,
+                    profilereporter: data.imageurl,
+                    usernamereported: data2.username,
+                    profilereported: data2.imageurl,
+                })
+            }
+    }
+
+    
+}
+
+    loopsasync().then(()=>{
+        res.send({
+            out:output,
+        })
+    })
+    
+}
+// Get usernames of the followers 
+router.route('/usernameofreports').post((req,res,next)=>{
+    
+    HandleReport(req,res).then(()=>{
+        console.log("Done") 
+    })
+})
+
+// CHECK IF STATS EXISTS FOR THE PAGE OR NOT
+// IF NOT , WE WILL CREATE ONE 
+router.route('/statcreate').post((req,res,next)=>{
+    const date = new Date() 
+
+
+    gr.find({
+
+    }).then((val)=>{
+        val.forEach((e)=>{
+            let name = e.name 
+            stat.find({
+                name:name, 
+                
+            }).then((val)=>{
+                const req = val.filter((e)=>{
+
+                    let dateit = new Date(e.dateOfCreation)
+                    return dateit.getFullYear() === date.getFullYear() && dateit.getMonth() === date.getMonth() && dateit.getDate() === date.getDate() 
+                }) 
+                if(req.length === 0)
+                {
+                    const lmao = new stat({
+                        name: name, 
+                        dateOfCreation: date, 
+                    })
+        
+                    lmao.save()
+                }
+                
+            }).catch((err)=>{
+                console.log("ERROR BRO: ",err) 
+            })
+        })
+    }).catch((err)=>{
+        console.log("Error")
+    })
+})
+
+// IF THE USER VISITS THE SPACE, THEN WE SHOULD ACTUALLY BE ABLE TO ADD HIM TO THE LIST 
+router.route('/visit').post((req,res,next)=>{
+    const email = req.body.emailid
+    const name = req.body.name 
+
+    console.log("email : ",email)
+    console.log("name: ",name) 
+
+    stat.find({
+        name: name,
+    }).then((val) => {
+        const date = new Date() 
+        const req = val.filter((e) => {
+            let dateit = new Date(e.dateOfCreation)
+            return dateit.getFullYear() === date.getFullYear() && dateit.getMonth() === date.getMonth() && dateit.getDate() === date.getDate()
+        })
+        if (req.length === 0) {
+             
+            const lmao = new stat({
+                name: name,
+                dateOfCreation: date,
+            })
+
+            lmao.save()
+        }
+        else 
+        {
+            console.log("ans: ",req[0]) 
+            let ans = req[0] 
+
+            if(!ans.visits.includes(email))
+            {
+                ans.visits.push(email)
+            }
+
+            console.log("done adding") 
+            ans.save().then(()=>{
+                res.send({
+                    done: true,
+                })
+            }) 
+        }
+
+    }).catch((err) => {
+        console.log("ERROR BRO: ", err)
+    })
+})
+
+// Get stats
+const getDate = (date)=>{
+    
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    var now = new Date(date);
+    return months[now.getMonth()] + ' ' + now.getDate() + ',' + now.getFullYear() 
+}
+
+router.route('/getstat').post((req,res,next)=>{
+    // Get all stats
+    const name = req.body.name 
+
+    stat.find({
+        name: name,
+    }).then((val)=>{
+        let xaxis = []
+        let yaxis = []
+        let zaxis = []
+        let taxis = []
+        for(let i  = 0 ; i < val.length ; i++)
+        {
+            xaxis.push(getDate(val[i].dateOfCreation))
+            yaxis.push(val[i].visits.length) 
+            zaxis.push(val[i].posts) 
+            taxis.push(val[i].followers.length) 
+        }
+
+        for(let i = 1 ; i < val.length ; i++)
+        {
+            taxis[i] = taxis[i] + taxis[i - 1] 
+        }
+
+        res.send({
+            xaxis: xaxis, 
+            yaxis: yaxis,
+            zaxis: zaxis,
+            taxis: taxis,
+        })
+    }).catch((err)=>{
+        console.log("ERROR")
+    })
+})
 module.exports = router 

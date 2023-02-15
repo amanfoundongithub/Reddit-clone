@@ -35,6 +35,9 @@ const pageSchema = new mongoose.Schema({
         // required:true,
         type:[String],
     },
+    banned:{
+        type:[String],
+    },
     pending:{ // invites of pending user 
         type:[
             {
@@ -53,6 +56,23 @@ const pageSchema = new mongoose.Schema({
     createdOn:{
         default: new Date(),
         type:Date,
+    },
+    // Keep track of the reports 
+    reports:{
+        type:[{
+            reportedBy: String, // Email of the person who reported 
+            reported: String,   // Email of the reported person 
+            Concern: String,    // Relevant concern of report
+            postID: String,     // ID of the post which is reported. 
+            reportedOn: {
+                type:Date, 
+                default: new Date(),
+            },
+            blockButton:{
+                type:Boolean,
+                default:false,
+            }
+        }] 
     }
 })
 

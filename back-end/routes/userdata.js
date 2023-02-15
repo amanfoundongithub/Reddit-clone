@@ -430,4 +430,45 @@ router.route('/usernames').post((req,res,next)=>{
 })
 
 
+// REMOVE FROM FOLLOWER AS FOLLOWS
+
+
+router.route('/removefollower').post((req,res,next)=>{
+    const follower = req.body.follower
+
+    const email = req.body.email 
+
+    user.findOne({
+        email:follower,
+    }).then((val)=>{
+        val.following.splice(val.following.indexOf(email),1) 
+        console.log("val.following: ",val.following) 
+        val.save().then(()=>{
+            // Now add the follower to the email 
+            user.findOne({
+                email:email,
+            }).then((val)=>{
+                val.followers.splice(val.followers.indexOf(follower),1)
+                val.save().then(()=>{
+                    res.send({
+                        message:'Saved'
+                    })
+                })
+            }).catch((val)=>{
+                res.send({
+                    message:'NotSaved' 
+                })
+            })
+        }).catch(()=>{
+            res.send({
+                message:'NotSaved'
+            })
+        })
+    }).catch((err)=>{
+        console.log("Error in finding") 
+        console.log(err)
+    })
+    
+})
+
 module.exports = router 

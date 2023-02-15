@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const userSchema = require('../MongoStuff/Objects/user')
 
 const postSchema = require('../MongoStuff/Objects/post')
+const statSchema = require('../MongoStuff/Objects/stats')
 
 require('dotenv').config() 
 
@@ -19,6 +20,8 @@ const gr = mongoose.model("Greddiits",pageSchema)
 const user = mongoose.model("User",userSchema) 
 
 const post = mongoose.model("Posts",postSchema)
+
+const stat = mongoose.model("Stats",statSchema) 
 
 
 // Authenticate token
@@ -89,6 +92,37 @@ router.route('/create').post((req,res,next)=>{
             val.posts.push(response._id)
 
             val.save().then(()=>{
+                // Now add to stats 
+                stat.find({
+                    name: name,
+                }).then((val) => {
+                    const date = new Date() 
+                    const req = val.filter((e) => {
+                        let dateit = new Date(e.dateOfCreation)
+                        return dateit.getFullYear() === date.getFullYear() && dateit.getMonth() === date.getMonth() && dateit.getDate() === date.getDate()
+                    })
+                    if (req.length === 0) {
+                         
+                        const lmao = new stat({
+                            name: name,
+                            dateOfCreation: date,
+                        })
+            
+                        lmao.save()
+                    }
+                    else 
+                    {
+                        console.log("ans: ",req[0]) 
+                        let ans = req[0] 
+            
+                        ans.posts = ans.posts + 1
+                        console.log("done adding") 
+                        ans.save() 
+                    }
+            
+                }).catch((err) => {
+                    console.log("ERROR BRO: ", err)
+                })
                 res.send({
                     created:true, 
                 })
@@ -105,6 +139,7 @@ router.route('/create').post((req,res,next)=>{
         })
     }).catch((err)=>{
         console.log("ERROR IN CREATING POST")
+        console.log(err) 
         res.send({
             created:false,
         })
@@ -124,12 +159,39 @@ const HandleUsernames = async (req,res)=>{
         {
             let result = await post.findById(list[i]) 
 
+            if(result === null)
+            {
+                continue 
+            }
+
             let name = result.createdBy 
 
             let profile = await user.findOne({
                 email:name, 
             })
 
+            let greddit = await gr.findOne({
+                posts:list[i],
+            })
+
+            if(greddit.banned.includes(name) === true)
+            {
+                output.push({
+                    profile: 'https://qph.cf2.quoracdn.net/main-qimg-73e139be8bfc1267eeed8ed6a2802109-lq',
+                    username:'BLOCKED USER',
+                    email:name,
+                    title: result.title, 
+                    body:result.content, 
+                    created:result.createdAt, 
+                    upvotes:result.upvotes, 
+                    downvotes:result.downvotes,
+                    comments:result.comments,
+                    id: list[i],
+                }) 
+            }
+
+           else 
+           {
             output.push({
                 profile: profile.imageurl,
                 username:profile.username,
@@ -142,6 +204,8 @@ const HandleUsernames = async (req,res)=>{
                 comments:result.comments,
                 id: list[i],
             }) 
+           }
+            
         }
     }
 
@@ -224,10 +288,10 @@ router.route('/downvote').post((req,res,next)=>{
     })
 })
 
-
 // HANDLES THE COMMENT ADDITION TO A POST 
 router.route('/comment').post((req,res,next)=>{
     post.findById(req.body.id).then((val)=>{
+        
         val.comments.push({
             body: req.body.body,
             by: req.body.email,
@@ -261,6 +325,7 @@ const HandleCommentPost = async (req,res)=>{
                 email: element.by 
             }) 
 
+           
             output.push({
                 profile: details.imageurl, 
                 username: details.username, 
@@ -341,5 +406,234 @@ router.route('/delbookmark').post((req,res,next)=>{
     })
 })
 
+// GET THE BOOKMARKED POSTS
+const Handle = async (req,res)=>{
 
+    // Get list of comments
+    const list = req.body.list 
+
+    // check 
+    const lol = req.body.lol
+
+    // Now get the user data 
+    let output = [] 
+
+    const loopasync2 = async ()=>{
+        for(let i = 0 ; i < list.length ; i++)
+        {
+            if(list[i].length === 0)
+            {
+                continue 
+            }
+            let element = list[i] 
+            
+
+            let details = await post.findById(element) 
+
+            if(details === null)
+            {
+                continue 
+            }
+
+            let name = details.createdBy
+
+            let gre = await gr.findOne({
+                posts:details._id
+            })
+
+            let profile = await user.findOne({
+                email:name, 
+            })
+
+            if(lol === true)
+            {
+                
+                output.push({
+                    profile: profile.imageurl,
+                username:profile.username,
+                email:name,
+                    id: details._id,
+                    title:details.title, 
+                    body:details.content,
+                    created:details.createdAt,
+                    createdBy:details.createdBy,
+                    upvotes:details.upvotes,
+                    downvotes:details.downvotes,
+                    comments:details.comments,
+                    name:gre.name,
+                })
+            }
+            else
+            {
+                output.push(details)  
+            }
+            
+            
+        }
+    }
+
+
+    loopasync2().then(()=>{
+        
+        res.send({
+            list:output,
+        })
+        
+    }).catch((err)=>{
+        console.log("Error: ",err)
+       
+    })
+}
+
+router.route('/bookmarkit').post((req,res,next)=>{
+    Handle(req,res).then(()=>{
+        console.log("Successful request")
+    }).catch((err)=>{
+        console.log("ERROR")
+    })
+})
+
+// MAKE A REQUEST TO REPORT A PAGE
+router.route('/report').post((req,res,next)=>{
+    // Now take the details
+    const postID = req.body.postID
+    const reporter = req.body.reporter
+    const reported = req.body.reported 
+    const concern  = req.body.concern 
+    const name     = req.body.name 
+
+    gr.findOne({
+        name:name,
+    }).then((val)=>{
+
+        val.reports.push({
+            reportedBy:reporter, 
+            reported:reported, 
+            postID:postID, 
+            Concern:concern,
+        })
+
+        val.save().then(()=>{
+            res.send({
+                reported: true, 
+            })
+            console.log("REPORTED")
+        }).catch((err)=>{
+            console.log("LMAOSAVJFGU")
+        })
+    })
+
+})
+
+// GET DETAILS OF A SINGLE POST FOR REPORT PAGE
+router.route('/reportdata').post((req,res,next)=>{
+    const request = req.body.id 
+
+    post.findById(request).then((val)=>{
+        res.send({
+            data:val,
+        })
+    }).catch((err)=>{
+        res.send({
+            data:undefined,
+        })
+    })
+})
+
+
+
+// NOW DELETE A POST FOR THE REPORT PAGE
+const HandleDeletePost = async (id,res,report)=>{
+    // First remove post from the bookmarked
+
+    console.log("id: ",id) 
+    let val = await user.find({
+        savedPosts:id, 
+    })
+
+    for(let i = 0 ; i < val.length ; i++)
+    {
+        let e = val[i] 
+
+        if(e.savedPosts === undefined)
+        {
+            return 
+        }
+        e.savedPosts.splice(e.savedPosts.indexOf(id),1)
+        await e.save()
+    }
+    
+
+    // Now remove the post from the database
+    let val2 = await gr.findOne({
+        posts:id,
+    })
+
+    console.log("val: ",val2)
+    if(val2)
+    {
+        val2.posts.splice(val2.posts.indexOf(id),1) 
+        let element = val2.reports.indexOf(val2.reports.find(item =>{
+            // console.log("item._id",item._id.toString())  
+            return item._id.toString() === report
+        })) 
+
+        val2.reports.splice(element,1) 
+
+        await val2.save() 
+    }
+
+    // Finally delete the post
+     await post.findByIdAndDelete(id)
+    res.send({
+        success:true, 
+    })
+    
+}
+router.route('/deletepost').post((req,res,next)=>{
+    // Deletes a post given its id
+    const id = req.body.id 
+    const report = req.body.report 
+    HandleDeletePost(id,res,report).then(()=>{
+        console.log("DELETED")
+    }).catch((err)=>{
+        console.log("ERROR IN DELETION")
+        console.log(err) 
+        res.send({
+            success:false,
+        })
+    })
+    
+})
+
+
+// IGNORE THE POST
+router.route('/ignore').post((req,res,next)=>{
+
+    const postId = req.body.post
+
+    const id = req.body.post2
+
+    console.log("id: ",id) 
+
+    gr.findOne({
+        posts:postId
+    }).then((val)=>{
+        // Now disable in subrequest
+        let element = val.reports.indexOf(val.reports.find(item =>{
+            console.log("item._id",item._id.toString())  
+            return item._id.toString() === id
+        }))
+
+        val.reports[element].blockButton = true 
+
+        val.save().then(()=>{
+            console.log("Done")
+            res.send({
+                done:true,
+            })
+        })
+
+    })
+})
 module.exports = router 
