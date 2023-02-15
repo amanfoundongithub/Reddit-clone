@@ -7,7 +7,6 @@ import tags from '../Components/Images/tags.png'
 import sad from '../Components/Images/sad.png'
 import followers from '../Components/Images/followers.png'
 import mode from '../Components/Images/mod.png'
-import pencil from '../Components/Images/pencil.png' 
 import accept from '../Components/Images/done.png'
 import reject from '../Components/Images/reject.png'
 
@@ -49,11 +48,14 @@ const FollowerPage = ()=>{
         pending:[],
         posts:[],
         createdOn: new Date(),
+        banned:[]
     })
 
     const [editdesc,setED] = useState('')
     const [profURL,setProf] = useState('')
     const [covURL,setCovURL] = useState('') 
+
+    const [list3,setList3] = useState([])
 
     function newupdate(e)
     {
@@ -85,6 +87,13 @@ const FollowerPage = ()=>{
             console.log("AXIOS ERROR")
         })
     
+        axios.post('http://localhost:4000/gr/getdata',{
+            list:e.banned,
+        }).then((response)=>{
+            setList3(response.data.usernames)
+        }).catch((err)=>{
+            console.log("AXIOS ERROR")
+        })
         
         
         CheckInItOrNot(e.followers,e.moderators,e.pending).then((val)=>{
@@ -268,7 +277,7 @@ const FollowerPage = ()=>{
     const [list,setList] = useState([])
     const [list2,setList2] = useState([]) 
 
-    console.log("list2: ",list2) 
+    let det = details.banned.includes(em) 
     // Make a new component: 
     return(
         <div className="container-fluid">
@@ -288,27 +297,28 @@ const FollowerPage = ()=>{
                 }} width='80' height='80'/>
             
                 <span className="h4 my-4">&nbsp;&nbsp; gr/{details.name}&nbsp;&nbsp;</span>
-                {
-                    mod === true ? 
-                    ""
-                     :
-                    ""
-                }
+              
                 &nbsp;&nbsp;
                 {
-                    email === true ? 
+                    mod === true ?
+                    <button className="btn btn-success my-3" disabled>You cannot leave this SubGrediit </button>
+                    :
+                    email === true && det === false? 
                     <button className="btn btn-danger my-3" onClick={
                         ()=>{
                             UnFollow() 
                         }
                     }>Leave This SubGreddiit</button>
                     :
-                    pending === false ?
+                    pending === false && det === false?
                     <button className="btn btn-success my-3" onClick={()=>{
                         Follow() 
                     }}>Follow This SubGreddiit </button>
                     :
+                    det === false ? 
                     <button className="btn btn-success my-3" disabled>Pending Request </button>
+                    :
+                    <button className="btn btn-primary my-3" disabled>You cannot join this subGreddiit</button>
                 }
                 </div>
                 {
@@ -334,7 +344,19 @@ const FollowerPage = ()=>{
   {
     mod === true ? 
     <li class="nav-item">
-    <a class="nav-link" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit (for moderators)</a>
+    <a class="nav-link" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit </a>
+  </li>:""
+  }
+  {
+    mod === true ? 
+    <li class="nav-item">
+    <a class="nav-link" href={'/gr/' + details.name + "/reports"}>Reports</a>
+  </li>:""
+  }
+   {
+    mod === true ? 
+    <li class="nav-item">
+    <a class="nav-link" href={'/gr/' + details.name + "/stats"}>Stats </a>
   </li>:""
   }
 </ul>
@@ -342,62 +364,26 @@ const FollowerPage = ()=>{
                     <div className="w-100 align-items-center" style={{
                         // display:'inline-block'
                     }}>
-                        {email === true ?
-                        <div>
-                        
-                        <h5>Followers of gr/{details.name}</h5>
-                        </div>
-                        : ""
 
-}
-                        
-                        
-                    </div>
-                            <br></br>
-                            
-                    <div className="align-items-center justify-content-center" id='content'>
-                        <div className="border border-success">
-                            
-                        </div>
-                        {
-                            // Above will be the button that will help us to add the button 
-                            details.followers.length === 0 ?
-                            <div style={{
-                                margin:'auto'
-                            }}>
-                            <p style={{
-                                textAlign:'center',
-                                
-                            }}>
-                                <img src={sad} />
-                               &nbsp; No followers yet 
-                            </p>
-                            </div>
-                            :
-                            // Display all the posts 
-                            <div>
-                                {list.map((e)=>{
-                                    return(
-                                        <div>
-                                        <a href={'/profile/' + e.username} style={{
-                                            textDecoration:'none'
-                                        }}>
-                                            <img src={e.profile} width='60' height='60' className="rounded-circle" />
-                                            &nbsp;
-                                            {e.username} 
-                                        </a>
-                                        <br></br>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        }
-                        <br></br>
                         {
                             mod === true ? 
                             <div id='pending'>
                                 <h3>Pending Requests</h3>
                                 {
+                                    list2.length === 0 ?
+                                    <div style={{
+                                        margin:'auto'
+                                    }}>
+                                    <p style={{
+                                        textAlign:'center',
+                                        
+                                    }}>
+                                        <img src={sad} />
+                                       &nbsp; No Joining Requests
+                                    </p>
+                                    </div>
+                                    :
+
                                     list2.map((e)=>{
                                         return(
                                             <div className="border border-success">
@@ -462,7 +448,109 @@ const FollowerPage = ()=>{
                             :
                             ""
                         }
+                    {email === true ?
+                        <div>
+                        
+                        <h5>Followers of gr/{details.name}</h5>
+                        </div>
+                        : ""
+
+}
+                        
+                        
+                    </div>
+                            <br></br>
                             
+                    <div className="align-items-center justify-content-center" id='content'>
+                        <div className="border border-success">
+                            
+                        </div>
+                        {
+                            // Above will be the button that will help us to add the button 
+                            details.followers.length === 0 ?
+                            <div style={{
+                                margin:'auto'
+                            }}>
+                            <p style={{
+                                textAlign:'center',
+                                
+                            }}>
+                                <img src={sad} />
+                               &nbsp; No followers yet 
+                            </p>
+                            </div>
+                            :
+                            // Display all the posts 
+                            <div>
+                                {list.map((e)=>{
+                                    return(
+                                        <div>
+                                        <a href={'/profile/' + e.username} style={{
+                                            textDecoration:'none'
+                                        }}>
+                                            <img src={e.profile} width='60' height='60' className="rounded-circle" />
+                                            &nbsp;
+                                            {e.username} 
+                                        </a>
+                                        <br></br>
+                                        </div>
+                                    )
+                                })}
+                            <br></br>
+                            </div>
+                        }
+                        
+                        <br></br>
+                    {email === true ?
+                        <div>
+                        
+                        <h5>Banned Users of gr/{details.name}</h5>
+                        </div>
+                        : ""
+
+}
+                        
+                        
+                    </div>
+                            <br></br>
+                            
+                    <div className="align-items-center justify-content-center" id='content'>
+                        <div className="border border-success">
+                            
+                        </div>
+                        {
+                            // Above will be the button that will help us to add the button 
+                            details.banned.length === 0 ?
+                            <div style={{
+                                margin:'auto'
+                            }}>
+                            <p style={{
+                                textAlign:'center',
+                                
+                            }}>
+                                <img src={sad} />
+                               &nbsp; No banned users yet 
+                            </p>
+                            </div>
+                            :
+                            // Display all the posts 
+                            <div>
+                                {list3.map((e)=>{
+                                    return(
+                                        <div>
+                                        <a href={'/profile/' + e.username} style={{
+                                            textDecoration:'none'
+                                        }}>
+                                            <img src={e.profile} width='60' height='60' className="rounded-circle" />
+                                            &nbsp;
+                                            {e.username} 
+                                        </a>
+                                        <br></br>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        }
                     </div>
                     </div>
                     

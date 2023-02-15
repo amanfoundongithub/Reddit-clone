@@ -4,7 +4,7 @@ import upvote from '../Images/upvote.png'
 import downvote from '../Images/downvote.png'
 import comment from '../Images/comment.png'
 import bookmarkicon from '../Images/bookmark.png' 
-
+import report from '../Images/report.png'
 
 const getDate = (date)=>{
     
@@ -21,9 +21,19 @@ const Post = (props)=>{
 
      const data = props.data 
 
+     let sub = null 
+     if(props.sub != undefined)
+     {
+        sub = props.sub 
+     }
+ 
+
      const email = props.current
 
      const bookmark = props.arr 
+
+     const mods = props.mod
+     console.log("data:",data) 
 
      const [arr,setArr] = useState([]) 
 
@@ -53,9 +63,13 @@ const Post = (props)=>{
   
     })
 
-    
-    
-    
+    let dink = data.id 
+
+      if(props.tim === false)
+      {
+        console.log("here")
+        dink = data._id
+      }
      // Creates a modal component to display the comments
      const ModalOfComments = ()=>{
 
@@ -67,6 +81,7 @@ const Post = (props)=>{
           email:email, 
           body:bodyofcomment,
           id:data.id, 
+          
         }).then(()=>{
           console.log("DONE")
          
@@ -75,8 +90,9 @@ const Post = (props)=>{
         })
       }
     
+
+
       
-  
       return(
         <div style={{
           display:'inline-block'
@@ -196,6 +212,33 @@ const Post = (props)=>{
         console.log("Error: AXIOS MADARCHOD") 
       })
     }
+
+    const HandleReports = ()=>{
+      if(data.email === email)
+      {
+        alert('ALERT: You cannot report yourself!')
+        return 
+      }
+      if(mods.includes(data.email))
+      {
+        alert('You cannot report a moderator!')
+        return 
+      }
+      axios.post('http://localhost:4000/post/report',{
+        reporter:email, 
+        reported:data.email, 
+        concern:'porn',
+        postID:data.id,
+        name:sub,
+      }).then((res)=>{
+        if(res.data.reported === true)
+        {
+
+        }
+
+        alert('Reported') 
+      })
+    }
     
     return(
     <div class="card text w-100">
@@ -212,8 +255,18 @@ const Post = (props)=>{
       fontWeight:'bold' 
     }}>
     <img src={data.profile} width='40' height='40' className="rounded-circle" alt='profile'/> &nbsp;
-    {data.username} 
-    </a>
+    {data.username} &nbsp;
+    </a> 
+    {
+      props.name === undefined ? 
+      ""
+      :
+      <a href={'/gr/' + props.name} style={{
+        textDecoration:'none',
+        color:'black',
+        
+      }}>(from {props.name})</a>
+    }
     
     <p class="card-text">{data.body}</p>
     <div className="row">
@@ -246,28 +299,43 @@ const Post = (props)=>{
 
 {/* </div>
 <div className="col"> */}
-    <ModalOfComments />
+{
+  props.discomment === false ?
+  ""
+  :
+  <ModalOfComments />
+}
+    
     </div>
 
     <div className="col-5"></div>
     <div className="col d-flex flex-row-reverse">
+      {console.log("dink: ",dink)}
     {
-      bookmark.includes(data.id) === true ?
+      bookmark.includes(dink) === true  || props.show === true?
       <button className="btn btn-outline-danger" onClick={
         ()=>{
           HandleRemoveBookmark() 
         }
-      }><img src={bookmarkicon} width='20' height='20' alt='op'/></button>
+      }
+      data-toggle="tooltip" data-placement="top" title="Remove from Saved Posts"><img src={bookmarkicon} width='20' height='20' alt='op'/></button>
       :
       <button className='btn btn-outline-warning' onClick={()=>{
         HandleBookmark() 
-      }}><img src={bookmarkicon} width='20' height='20' alt='op'/></button>
+      }}
+      data-toggle="tooltip" data-placement="top" title="Add To Saved Posts"><img src={bookmarkicon} width='20' height='20' alt='op'/></button>
     }
+    <button className='btn btn-outline-danger' onClick = {()=>{
+      HandleReports() 
+    }}>
+    <img src={report} width='20' height='20' alt='op'/>
+       </button>
     </div>
     </div>
   </div>
   <div class="card-footer text-muted">
     Posted on: {getDate(data.created)} 
+
   </div>
 </div>
     )

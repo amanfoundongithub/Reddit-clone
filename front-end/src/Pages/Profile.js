@@ -3,7 +3,6 @@ import NavBar from "../Components/Navbar/NavBar"
 import { useNavigate } from "react-router-dom"
 import Footer from "../Components/Footer/Footer";
 import axios from "axios";
-// import Modal from "../Components/Profile/Modal";
 
 
 const getDate = (date)=>{
@@ -37,7 +36,7 @@ const Profile = ()=>{
         if(window.localStorage.getItem("current-username") !== 'yes')
         {
             navigate('/signin')
-            // window.location.reload() 
+            
         }
     })
 
@@ -55,7 +54,11 @@ const Profile = ()=>{
         {
             title:'My SubGreddiits',
             href:'/mysg',
-        }
+        },
+        {
+            title:'My Saved Posts',
+            href:'/mysaved',
+        },
     ]
 
     // DETAILS 
@@ -177,6 +180,20 @@ const Profile = ()=>{
 
     console.log("inside modality: ",list) 
 
+    const RemoveFollower = (emailoffollower)=>{
+
+        axios.post('http://localhost:4000/userdata/removefollower',{
+            follower: emailoffollower, 
+            email : details.email,
+        }).then((res)=>{
+            if(res.data.success === true)
+            {
+                alert('removed from follower')
+                window.location.reload() 
+            }
+        })
+    }
+
         return(
             <div className="container">
                 {/* <!-- Button trigger modal --> */}
@@ -217,13 +234,24 @@ const Profile = ()=>{
           <div className="modal-body">
             {
                 list.length !== 0 ? 
-                list.map((ele)=>{
+                list.map((ele,index)=>{
                     return (<div className="container"><a type="button" className="bg-transparent" style={{
                         textDecoration:'none' ,
                         fontSize:'25px',
                         color:'black'
                     }}
-                    href={'/profile/' + ele} >{ele} </a>
+                    href={'/profile/' + ele} >{ele} &nbsp;</a>
+                    {
+                        props.title === 'Followers' ?
+                        <button className="btn btn-outline-danger" onClick={
+                            ()=>{
+                                RemoveFollower(details.followers[index]) 
+                            }
+                        }>Remove as follower</button>
+                        :
+                        ""
+                    }
+                    
                     <br></br>
                     </div>)
                 })
@@ -233,7 +261,6 @@ const Profile = ()=>{
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" className="btn btn-primary">Save changes</button>
           </div>
         </div>
       </div>
@@ -338,9 +365,7 @@ const Profile = ()=>{
                 {/* <Modal title={details.followers.length + " Followers"}/> 
                 <Modality />& */}
                 <p className="h4">&#10004; &nbsp; Member since {getDate(details.membersince)} </p> 
-                {
-                    console.log("find the solution:",followers,following )
-                }
+                
                 <Modality title='Followers' list={followers} id="followers"/> 
                 <Modality title='Following' list={following} id="following"/>
                 {/* <Modal /> */}

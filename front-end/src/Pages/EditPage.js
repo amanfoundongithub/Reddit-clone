@@ -1,6 +1,6 @@
 import axios from "axios"
 import React,{useEffect, useState} from "react"
-import { useParams} from "react-router-dom"
+import { useNavigate, useParams} from "react-router-dom"
 import NavBar from "../Components/Navbar/NavBar"
 import logo from '../Components/Images/create.png'
 import tags from '../Components/Images/tags.png'
@@ -21,6 +21,7 @@ const getDate = (date)=>{
 const EditPage = ()=>{
 
 
+    const navigate = useNavigate() 
     let loggedin = false 
     
     const [mod,setMod] = useState(false) 
@@ -155,12 +156,19 @@ const EditPage = ()=>{
             setMod(true) 
             return true 
         }
-        else if(list1.includes(emailid))
-        {
-            return true 
-        }
+        // else if(list1.includes(emailid))
+        // {
+        //     navigate('/gr/' + name) 
+        //     return true 
+        // }
+        // else 
+        // {
+        //     navigate('/gr/' + name ) 
+        //     return false 
+        // }
         else 
         {
+            navigate('/gr/' + name) 
             return false 
         }
     }
@@ -232,43 +240,41 @@ const EditPage = ()=>{
     // Make a new component: 
     return(
         <div className="container-fluid">
-            <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
+            <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title} />
             <div className="container-fluid">
                 <img src={details.coverImageURL} height='200' style={{
-                    width:'100%',
-                    
-                }}/>
-                
+                    width: '100%',
+
+                }} />
+
                 <div className="container-fluid justify-content-center text-center" style={{
-                display:'flex'
-            }}>  
-                <img src={details.profileImageURL} className="rounded-circle" style={{
-                    // width:'6%',
-                    
-                }} width='80' height='80'/>
-            
-                <span className="h4 my-4">&nbsp;&nbsp; gr/{details.name}&nbsp;&nbsp;</span>
-                {
-                    mod === true ? 
-                    ""
-                     :
-                    ""
-                }
-                &nbsp;&nbsp;
-                {
-                    email === true ? 
-                    <button className="btn btn-danger my-3" onClick={
-                        ()=>{
-                            UnFollow() 
-                        }
-                    }>Leave This SubGreddiit</button>
-                    :
-                    <button className="btn btn-success" onClick={
-                        ()=>{
-                            Follow() 
-                        }
-                    }>Follow This SubGreddiit </button>
-                }
+                    display: 'flex'
+                }}>
+                    <img src={details.profileImageURL} className="rounded-circle" style={{
+                        // width:'6%',
+
+                    }} width='80' height='80' />
+
+                    <span className="h4 my-4">&nbsp;&nbsp; gr/{details.name}&nbsp;&nbsp;</span>
+
+                    &nbsp;&nbsp;
+                    {
+                        mod === true ?
+                            <button className="btn btn-success my-3" disabled>You cannot leave this SubGrediit </button>
+                            :
+                            email === true ?
+                                <button className="btn btn-danger my-3" onClick={
+                                    () => {
+                                        UnFollow()
+                                    }
+                                }>Leave This SubGreddiit</button>
+                                :
+                                <button className="btn btn-success" onClick={
+                                    () => {
+                                        Follow()
+                                    }
+                                }>Follow This SubGreddiit </button>
+                    }
                 </div>
                 {
                     // Main body of the page 
@@ -277,109 +283,125 @@ const EditPage = ()=>{
                 <div className="row" id='main-body'>
 
                     <div className="col ">
-                        
+
                     </div>
                     <div className="col-6">
-                    <ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a class="nav-link" aria-current="page" href={'/gr/' + details.name}>Posts</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href={"/gr/" + details.name + "/followers"}>Followers</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href={"/gr/" + details.name + "/mod"}>Moderators</a>
-  </li>
-  {
-    mod === true ? 
-    <li class="nav-item">
-    <a class="nav-link active" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit (for moderators)</a>
-  </li>:""
-  }
-</ul>
-<br></br>
-                    <div className=" w-100 align-items-center" style={{
-                        // display:'inline-block'
-                    }}>
-                        
-                        <div>
-                        
-                        <p style={{
-                            fontSize:'25px',
-                            textAlign:'center'
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href={'/gr/' + details.name}>Posts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href={"/gr/" + details.name + "/followers"}>Followers</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href={"/gr/" + details.name + "/mod"}>Moderators</a>
+                            </li>
+                            {
+                                mod === true ?
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit </a>
+                                    </li> : ""
+                            }
+                            {
+                                mod === true ?
+                                    <li class="nav-item">
+                                        <a class="nav-link" href={'/gr/' + details.name + "/reports"}>Reports </a>
+                                    </li> : ""
+                            }
+                        </ul>
+                        <br></br>
+
+
+                        <div className=" w-100 align-items-center" style={{
+                            // display:'inline-block'
                         }}>
-                       [ <img src={photo} className='rounded-circle' width='80' height='80'/>
-                        You are editing this page as {user} ]</p>
+                        {
+                            mod === true ? 
+                            <div>
+
+                                <p style={{
+                                    fontSize: '25px',
+                                    textAlign: 'center'
+                                }}>
+                                    [ <img src={photo} className='rounded-circle' width='80' height='80' />
+                                    You are editing this page as {user} ]</p>
+                            </div>
+                            :
+                            ""
+                        }
+
+
                         </div>
-                        
-                        
-                    </div>
-                            <br></br>
-                            
-                    <div className="" id='content'>
-                        <h3 style={{
-                            textAlign:'center'
-                        }}>Edit This SubGreddiit Details</h3>
-                        <div className="input-group mb-3">
-  <span className="input-group-text" id="inputGroup-sizing-default3">Description:</span>
-  <textarea type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default3"
-  value={editdesc} onChange={(e)=>{setED(e.target.value)}}/> 
-  <p style={{
-                                    fontFamily:'Garamond',
-                                    fontSize:'20px'
-                                }}>Hint: Keeping a good description often sums up about the 
-                                subgreddiit and might help to increase followers of the
-                                subgreddiit !  </p>
-</div>
-<div className="input-group mb-3">
-  <span className="input-group-text" id="inputGroup-sizing-default4">Profile Image URL:</span>
-  <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default4"
-  value={profURL} onChange={(e)=>{setProf(e.target.value)}}/> 
-  
-  <p style={{
-                                    fontFamily:'Garamond',
-                                    fontSize:'20px'
+                        <br></br>
+                        {
+                            mod === true ?
+                        <div className="" id='content'>
+                            <h3 style={{
+                                textAlign: 'center'
+                            }}>Edit This SubGreddiit Details</h3>
+                            <div className="input-group mb-3">
+                                <span className="input-group-text" id="inputGroup-sizing-default3">Description:</span>
+                                <textarea type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default3"
+                                    value={editdesc} onChange={(e) => { setED(e.target.value) }} />
+                                <p style={{
+                                    fontFamily: 'Garamond',
+                                    fontSize: '20px'
+                                }}>Hint: Keeping a good description often sums up about the
+                                    subgreddiit and might help to increase followers of the
+                                    subgreddiit !  </p>
+                            </div>
+                            <div className="input-group mb-3">
+                                <span className="input-group-text" id="inputGroup-sizing-default4">Profile Image URL:</span>
+                                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default4"
+                                    value={profURL} onChange={(e) => { setProf(e.target.value) }} />
+
+                                <p style={{
+                                    fontFamily: 'Garamond',
+                                    fontSize: '20px'
                                 }}>Keep a cool dp is a pro tip!  </p>
-</div>
-<div className="input-group mb-3">
-  <span className="input-group-text" id="inputGroup-sizing-default4">Cover Image URL:</span>
-  <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default4"
-  value={covURL} onChange={(e)=>{setCovURL(e.target.value)}}/> 
- 
-  <p style={{
-                                    fontFamily:'Garamond',
-                                    fontSize:'20px'
+                            </div>
+                            <div className="input-group mb-3">
+                                <span className="input-group-text" id="inputGroup-sizing-default4">Cover Image URL:</span>
+                                <input type="text" className="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default4"
+                                    value={covURL} onChange={(e) => { setCovURL(e.target.value) }} />
+
+                                <p style={{
+                                    fontFamily: 'Garamond',
+                                    fontSize: '20px'
                                 }}>Cover Image URL </p>
 
 
-</div>
+                            </div>
 
-<button className="btn btn-outline-warning w-100 my-3" onClick={()=>{
-    EditGreddiit()
-}}>
-    Edit This SubGreddiit
-</button>
-                    
+                            <button className="btn btn-outline-warning w-100 my-3" onClick={() => {
+                                EditGreddiit()
+                            }}>
+                                Edit This SubGreddiit
+                            </button>
+
+                        </div>
+                        : ""
+                        }
                     </div>
-                    </div>
-                    
+
+
                     <div className="col justify-content-center" id='about' >
                         <div class="card" style={{
-                            width:'18em',
-                            height:'32em',
-                            margin:'auto'
+                            width: '18em',
+                            height: '32em',
+                            margin: 'auto'
                         }}>
 
                             <div class="card-body" style={{
-                                backgroundColor:'blue',
-                                height:'0.25em'
+                                backgroundColor: 'blue',
+                                height: '0.25em'
                             }}>
-                                
+
                                 <h5 class="card-title" style={{
-                                    textAlign:'center',
-                                    color:'white'
+                                    textAlign: 'center',
+                                    color: 'white'
                                 }}>About This SubGreddiit</h5>
-                            </div> 
+                            </div>
                             <div className="card-body">
                                 <p class="card-text">
                                     {details.description}</p>
@@ -391,46 +413,46 @@ const EditPage = ()=>{
                             </div>
                             <div className="card-body">
                                 <p className="text-muted">
-                                <img src={logo} alt="Created" height='20' width='20'/> &nbsp;Created on {getDate(details.createdOn)}</p>
-                                
-                                <p className="text-muted">
-                                <img src={followers} alt="Followers" width='20' height='20'/>&nbsp;&nbsp;Followed by {details.followers.length} people</p>
+                                    <img src={logo} alt="Created" height='20' width='20' /> &nbsp;Created on {getDate(details.createdOn)}</p>
 
                                 <p className="text-muted">
-                                <img src={mode} alt="Mod" width='20' height='20'/>&nbsp;&nbsp;Moderated by {details.moderators.length} people</p>
+                                    <img src={followers} alt="Followers" width='20' height='20' />&nbsp;&nbsp;Followed by {details.followers.length} people</p>
+
+                                <p className="text-muted">
+                                    <img src={mode} alt="Mod" width='20' height='20' />&nbsp;&nbsp;Moderated by {details.moderators.length} people</p>
                             </div>
-                            
-                            
+
+
                             <div class="card-body">
-                            <img src={tags} alt="existed"/>
+                                <img src={tags} alt="existed" />
                                 <p className="text-muted">sg/{details.name}'s Tags:</p>
                                 {
-                                    details.tags.map((e,i)=>{
-                                        
-                                        return(
+                                    details.tags.map((e, i) => {
+
+                                        return (
                                             <span className="" style={{
-                                                backgroundColor:'green',
-                                                color:'white',
-                                                borderStyle:'solid',
-                                                fontSize:'1em',
-                                                borderRadius:'1em',
-                                                width:'2em',
-                                                padding:'0.35em'
+                                                backgroundColor: 'green',
+                                                color: 'white',
+                                                borderStyle: 'solid',
+                                                fontSize: '1em',
+                                                borderRadius: '1em',
+                                                width: '2em',
+                                                padding: '0.35em'
                                             }}>
                                                 {e} </span>
                                         )
                                     })
                                 }
-                              
+
                             </div>
                         </div>
                     </div>
                 </div>
-                </div>
-                
             </div>
-            
-        
+
+        </div>
+
+
     )
 }
 

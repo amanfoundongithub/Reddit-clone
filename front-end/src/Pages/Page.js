@@ -47,6 +47,7 @@ const Page = ()=>{
         pending:[],
         posts:[],
         createdOn: new Date(),
+        banned:[],
     })
 
     // const [editdesc,setED] = useState('')
@@ -137,26 +138,31 @@ const Page = ()=>{
     const [arr,setArr] = useState([]) 
 
     const CheckInItOrNot = async (list1,list2,list3,list4)=>{
-        if(loggedin === false )
-        {
-            return false 
-        }
-
-        // Logged in 
-
-        let result = await axios.post('http://localhost:4000/userdata/profile',{
-            token:"BEARER "+window.localStorage.getItem('myaccesstoken')
-        })
+        
 
         let result2 = await axios.post('http://localhost:4000/post/getdata',{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken'),
             body:list3
         })
 
+        
         setUrl(result2.data.output)
 
-        
+        if(loggedin === false )
+        {
+            return false 
+        }
+
+        let result = await axios.post('http://localhost:4000/userdata/profile',{
+            token:"BEARER "+window.localStorage.getItem('myaccesstoken')
+        })
         let emailid = result.data.message.email 
+
+        
+        let added = await axios.post('http://localhost:4000/gr/visit',{
+            emailid : emailid, 
+            name: name,
+        })
         
         setEm(emailid) 
 
@@ -234,23 +240,23 @@ const Page = ()=>{
         const [body,setBody] = useState('')
 
         const CheckBanned = ()=>{
-            
+
+            let temp = body.split(' ') 
             for(let i = 0 ; i < details.bannedKeywords.length ; i++)
             {
-                if(body.includes(details.bannedKeywords[i]))
+                for(let j = 0 ; j < temp.length ; j++)
                 {
-                    return true 
+                    if(temp[j].includes(details.bannedKeywords[i]))
+                    {
+                        return true 
+                    }
                 }
             }
 
             return false 
         }
 
-        const RemoveBannedKeywords = ()=>{
-            
-        
-
-        }
+     
 
         return(
             <div>
@@ -301,19 +307,23 @@ const Page = ()=>{
         <button type="button" class="btn btn-primary" onClick={
             ()=>{
 
-                let temp = body 
+                // let temp = body.split(' ')  
+                // let ans = ''
+                let bod = body 
                 if(CheckBanned() === true)
                 {
-                    let output = window.confirm('ALERT: Your post has been detected to contain some banned keywords! \
-                    Are you really sure you want to submit this post? If you post, all the banned keywords will \
-                    be just hidden.')
-
+                    let output = window.confirm('ALERT: Your post has been detected to contain some banned keywords! '+
+                    'Are you really sure you want to submit this post? If you post, all the banned keywords will' +
+                    ' be just hidden.')
+            
+                    console.log("output: ",output) 
                     if(output === false)
                     {
                         return  
                     }
                     else 
                     {
+                        
                         for (let i = 0; i < details.bannedKeywords.length; i++) {
                             let s = ''
                             for (let j = 0; j < details.bannedKeywords[i].length; j++) {
@@ -321,12 +331,19 @@ const Page = ()=>{
                             }
 
                             console.log("s: ",s) 
-                            temp = temp.replace(details.bannedKeywords[i], s)
+                            // for(let k = 0 ; k < temp.length ; k++)
+                            // {
+                            //     temp[k].replace(details.bannedKeywords[i],s) 
+                            //     ans = ans  + temp[k] + ' '
+                            // }   
+                            bod = bod.replace(details.bannedKeywords[i],s) 
                         }
+
+                        
                     }
                 }
 
-                console.log("value of body: ",temp)  
+                console.log("value of body: ",bod)  
                 let out = window.confirm('Are you sure you want to upload this post? ')
                 if(out === false)
                 {
@@ -335,7 +352,7 @@ const Page = ()=>{
                 axios.post('http://localhost:4000/post/create',{
                     name:name, 
                     title:title, 
-                    body:temp, 
+                    body:bod, 
                     token:'BEARER '+ window.localStorage.getItem('myaccesstoken')
                 }).then((res)=>{
                     if(res.data.created)
@@ -361,6 +378,8 @@ const Page = ()=>{
         )
     }
 
+    let det = details.banned.includes(em) 
+
     // Make a new component: 
     return(
         <div className="container-fluid">
@@ -381,24 +400,28 @@ const Page = ()=>{
             
             
                 <span className="h4 my-4">&nbsp;&nbsp; gr/{details.name}&nbsp;&nbsp;</span>
-                {
-                    console.log("pending: ",pending) 
-                }
+                
                 &nbsp;&nbsp;
                 {
-                    email === true ? 
+                    mod === true ?
+                    <button className="btn btn-success my-3" disabled>You cannot leave this SubGrediit </button>
+                    :
+                    email === true && det === false? 
                     <button className="btn btn-danger my-3" onClick={
                         ()=>{
                             UnFollow() 
                         }
                     }>Leave This SubGreddiit</button>
                     :
-                    pending === false ?
+                    pending === false && det === false?
                     <button className="btn btn-success my-3" onClick={()=>{
                         Follow() 
                     }}>Follow This SubGreddiit </button>
                     :
+                    det === false ? 
                     <button className="btn btn-success my-3" disabled>Pending Request </button>
+                    :
+                    <button className="btn btn-primary my-3" disabled>You cannot join this subGreddiit</button>
                 }
                 </div>
                 {
@@ -424,7 +447,19 @@ const Page = ()=>{
   {
     mod === true ? 
     <li class="nav-item">
-    <a class="nav-link" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit (for moderators)</a>
+    <a class="nav-link" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit </a>
+  </li>:""
+  }
+   {
+    mod === true ? 
+    <li class="nav-item">
+    <a class="nav-link" href={'/gr/' + details.name + "/reports"}>Reports</a>
+  </li>:""
+  }
+   {
+    mod === true ? 
+    <li class="nav-item">
+    <a class="nav-link" href={'/gr/' + details.name + "/stats"}>Stats </a>
   </li>:""
   }
 </ul>
@@ -447,6 +482,7 @@ const Page = ()=>{
                         <div className="border border-success">
                             
                         </div>
+                        
                         {
                             // Above will be the button that will help us to add the button 
                             details.posts.length === 0 ?
@@ -464,9 +500,10 @@ const Page = ()=>{
                             :
                             // Display all the posts 
                             <div>
+
                                 {
                                     details.posts.reverse().map((val,index)=>{
-                                     
+                                        console.log("url : ",url)
                                         if(url.length === 0)
                                         {
                                             return <></>
@@ -476,7 +513,8 @@ const Page = ()=>{
                                             {
                                                 console.log("arr: ",arr) 
                                             }
-                                            <Post data={url[index]} current={em} arr={arr}/>
+                                            <Post data={url[index]} current={em} arr={arr} sub={name}
+                                            mod={details.moderators}/>
                                             <br></br>
                                             </div>
                                         )

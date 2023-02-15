@@ -2,6 +2,7 @@ import React, { useEffect , useState} from "react"
 import NavBar from "../Components/Navbar/NavBar"
 import { useNavigate  } from "react-router-dom"
 import axios from 'axios' 
+import Post from '../Components/Page/Post'
 
 const getDate = (date)=>{
     
@@ -12,8 +13,10 @@ const getDate = (date)=>{
 }
 
 
-
-const MySubGreddits = ()=>{
+/*
+This component is aimed to display the Saved Posts By a User 
+*/
+const MySavedOnes = ()=>{
 
     const navigate = useNavigate() 
 
@@ -25,6 +28,7 @@ const MySubGreddits = ()=>{
             // window.location.reload() 
         }
     })
+
     // List of menu 
     const listofmenu = [
         {
@@ -39,6 +43,10 @@ const MySubGreddits = ()=>{
             title: 'Profile',
             href:'/profile',
         },
+        {
+            title:'My SubGreddiits',
+            href:'/mysg'
+        }
 
     ]
 
@@ -64,15 +72,22 @@ const MySubGreddits = ()=>{
     })  
 
     const [arr,setArr] = useState([])
+    const [det,setDet] = useState([]) 
 
+    
     function changedata(e){
         setDetails(e) 
 
         // Now set an axios request to get the usernames
-        axios.post('http://localhost:4000/gr/get',{
-            list:e.created, 
+    
+        axios.post('http://localhost:4000/post/bookmarkit',{
+            list:e.savedPosts, 
+            lol:true,
         }).then((res)=>{
+            console.log("res.data.list: ",res.data.list) 
+            setDet(res.data.list)
             setArr(res.data.list) 
+        
         }).catch((err)=>{
             console.log("Error") 
         })
@@ -113,6 +128,8 @@ const MySubGreddits = ()=>{
 
     }
 
+    console.log("details: ",details) 
+
 
     return(
         <div className="container-fluid">
@@ -121,33 +138,31 @@ const MySubGreddits = ()=>{
             <div className="col my-4 justify-content-center text-center">
                 <img src={details.imageurl} className="rounded-circle" width="300" height="300" alt="Profile"/>
             </div>
-            <div className="col my-4 display-6 justify-content-center" id="display basic info">
-            {
+            <div className="col my-4 justify-content-center" id="display basic info">
+                <p className="display-6">
+                {
                 details.username 
-            }'s SubGreddiits
-
+            }'s Saved Posts 
+                </p>
             {
+                console.log("Det: ,Arr:",det,arr) 
+            }
+            
+            {
+
                 arr.length === 0 ? 
-                <p className="h3">You have not yet created a SubGreddiit yet!</p>
+                <p className="h3">No Bookmarked Posts yet!</p>
                 :
-                arr.map((e)=>{
+                arr.map((e,index)=>{
+                   
                     return(
-                        <div>
-                            <br></br>
-                        <div className="col">
-                            <img src={e.image} width='50' height='50' className="rounded-circle"></img>&nbsp;
-                            <a href={'/gr/' + e.name} style={{
-                                textDecoration:'none'
-                            }}>{e.name}</a>
-                            <p className="h6">Created On: {getDate(e.createdate)}</p>
-                            <p className="h6">Followers : {e.followers}</p>
-                            <p className="h6">Moderators: {e.moderators}</p>
-                            <p className="h6">Posts     : {e.posts}</p>
-                            <button className="btn btn-outline-danger" onClick={()=>{
-                                HandleDelete(e.name) 
-                            }}>Delete This SubGreddiit</button>
-                        </div>
                         
+                        <div>
+                            {
+                                console.log("data: ",det[index]) 
+                            }
+                            <Post data={det[index]} current={details.email} arr={details.savedPosts} tim={false} discomment={false} name={det[index].name}
+                            show ={true}/>
                         </div>
                     )
                 })
@@ -160,4 +175,4 @@ const MySubGreddits = ()=>{
     )
 }
 
-export default MySubGreddits
+export default MySavedOnes

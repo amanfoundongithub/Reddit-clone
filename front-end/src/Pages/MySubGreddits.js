@@ -50,6 +50,25 @@ const Modal = ()=>{
         })
     }
 
+    const HandleTags = (e)=>{
+        setTags(e.target.value.split(' '))
+        
+        for(let i = 0 ; i < tags.length ; i++)
+        {
+            tags[i] = tags[i].trim() 
+        }
+
+    }
+
+    const HandleBan = (e)=>{
+        setBan(e.target.value.split(' '))
+        
+        for(let i = 0 ; i < ban.length ; i++)
+        {
+            ban[i] = ban[i].trim() 
+        }
+
+    }
     return(
         <div>
 <button type="button" className="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
@@ -79,11 +98,11 @@ const Modal = ()=>{
 </div>
 <div class="input-group mb-3">
   <span class="input-group-text" id="basic-addon1">Tags [seperated by space]:</span>
-  <input type="text" class="form-control" placeholder="Tags" aria-label="Username" aria-describedby="basic-addon1"  onChange={(e)=>{setTags(e.target.value.split(' '))}}/>
+  <input type="text" class="form-control" placeholder="Tags" aria-label="Username" aria-describedby="basic-addon1"  onChange={(e)=>{HandleTags(e)}}/>
 </div>
 <div class="input-group mb-3">
   <span class="input-group-text" id="basic-addon1">Banned Keywords [seperated by space]:</span>
-  <input type="text" class="form-control" placeholder="Banned Keywords" aria-label="Username" aria-describedby="basic-addon1"  onChange={(e)=>{setBan(e.target.value.split(' '))}}/>
+  <input type="text" class="form-control" placeholder="Banned Keywords" aria-label="Username" aria-describedby="basic-addon1"  onChange={(e)=>{HandleBan(e)}}/>
 </div>
  <button type='submit' className="btn btn-warning">CONFIRM</button>
         </form>
@@ -197,6 +216,8 @@ const MySubGreddits = ()=>{
 
     }
 
+    
+
 
     return(
         <div className="container-fluid">
@@ -223,10 +244,13 @@ const MySubGreddits = ()=>{
                             <a href={'/gr/' + e.name} style={{
                                 textDecoration:'none'
                             }}>{e.name}</a>
-                            <p className="h6">Created On: {getDate(e.createdate)}</p>
-                            <p className="h6">Followers : {e.followers}</p>
-                            <p className="h6">Moderators: {e.moderators}</p>
-                            <p className="h6">Posts     : {e.posts}</p>
+                            <h5>{e.desc}</h5>
+                            
+                            <p className="h6">Created On     : {getDate(e.createdate)}</p>
+                            <p className="h6">Followers      : {e.followers}</p>
+                            <p className="h6">Moderators     : {e.moderators}</p>
+                            <p className="h6">Posts          : {e.posts}</p>
+                            <p className="h6">Banned Keywords: {e.bannedKeywords.join(' ,')}</p>
                             <button className="btn btn-outline-danger" onClick={()=>{
                                 HandleDelete(e.name) 
                             }}>Delete This SubGreddiit</button>

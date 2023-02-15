@@ -1,13 +1,14 @@
 import axios from "axios"
 import React,{useEffect, useState} from "react"
-import { useParams} from "react-router-dom"
+import { useNavigate, useParams} from "react-router-dom"
 import NavBar from "../Components/Navbar/NavBar"
 import logo from '../Components/Images/create.png'
 import tags from '../Components/Images/tags.png'
 import sad from '../Components/Images/sad.png'
 import followers from '../Components/Images/followers.png'
 import mode from '../Components/Images/mod.png'
-// import pencil from '../Components/Images/pencil.png' 
+import Chart from "chart.js/auto";
+import { Line } from "react-chartjs-2";
 
 const getDate = (date)=>{
     
@@ -18,17 +19,75 @@ const getDate = (date)=>{
 }
 
 
-const ModPage = ()=>{
 
+const VisitStatReturn = (xaxis,yaxis)=>{
+    
+    return {
+        labels: xaxis,
+        datasets: [
+          {
+            label: 'Number of visits',
+            fill: false,
+            lineTension: 0.5,
+            backgroundColor: 'rgba(75,192,192,1)',
+            borderColor: 'rgba(0,0,0,1)',
+            borderWidth: 2,
+            data: yaxis,
+          }
+        ]
+      }
+}
 
+const PostReturn = (xaxis,yaxis)=>{
+    console.log("xaxis: ",xaxis)
+    console.log("yaxis: ",yaxis) 
+    return {
+        labels: xaxis,
+        datasets: [
+          {
+            label: 'Number of posts',
+            fill: false,
+            lineTension: 0.5,
+            backgroundColor: 'rgba(75,192,192,1)',
+            borderColor: 'rgba(0,0,0,1)',
+            borderWidth: 2,
+            data: yaxis,
+          }
+        ]
+      }
+}
+
+const FollowerReturn = (xaxis,yaxis)=>{
+    console.log("xaxis: ",xaxis)
+    console.log("yaxis: ",yaxis) 
+    return {
+        labels: xaxis,
+        datasets: [
+          {
+            label: 'Number of followers',
+            fill: false,
+            lineTension: 0.5,
+            backgroundColor: 'rgba(75,192,192,1)',
+            borderColor: 'rgba(0,0,0,1)',
+            borderWidth: 2,
+            data: yaxis,
+          }
+        ]
+      }
+}
+
+const StatsPage = ()=>{
+
+    const navigate = useNavigate() 
+    
     let loggedin = false 
     
     const [mod,setMod] = useState(false) 
 
-    if(window.localStorage.getItem('current-username'))
-    {
-        loggedin  = true 
-    }
+   if(window.localStorage.getItem('myaccesstoken'))
+   {
+        loggedin = true 
+   }
     
     const {name} = useParams() 
 
@@ -53,6 +112,16 @@ const ModPage = ()=>{
     const [profURL,setProf] = useState('')
     const [covURL,setCovURL] = useState('') 
 
+    // All stats 
+    const [xvisit,setxvisit] = useState([])
+    const [yvisit,setyvisit] = useState([]) 
+    
+    // 
+    const [xpost,setxpost] = useState([])
+    
+    // 
+    const [xfollow,setxfollow] = useState([]) 
+
     function newupdate(e)
     {
         // console.log("details:",details) 
@@ -64,13 +133,14 @@ const ModPage = ()=>{
         setED(e.description)
         setProf(e.profileImageURL)
         setCovURL(e.coverImageURL) 
-        console.log("e.mod:",e.moderators) 
-        axios.post('http://localhost:4000/gr/getdata',{
-        list2:e.pending,
-        list:e.moderators,  
+         
+        axios.post('http://localhost:4000/gr/getstat',{
+        name: name,
     }).then((response)=>{
-
-        setList(response.data.usernames)
+        setxvisit(response.data.xaxis) 
+        setyvisit(response.data.yaxis) 
+        setxpost(response.data.zaxis) 
+        setxfollow(response.data.taxis) 
     }).catch((err)=>{
         console.log("AXIOS ERROR")
     })
@@ -95,6 +165,7 @@ const ModPage = ()=>{
         if(message === 'INVALID')
         {
             alert('Invalid Greddiit name!')
+            navigate('/profile') 
             return 
         }
         else 
@@ -142,6 +213,8 @@ const ModPage = ()=>{
     const [pending,setPending] = useState(false) 
 
     const CheckInItOrNot = async (list1,list2,list4)=>{
+
+        
         if(loggedin === false )
         {
             return false 
@@ -152,9 +225,10 @@ const ModPage = ()=>{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken')
         })
 
-        
+
         let emailid = result.data.message.email 
-        
+
+        console.log("Emailid: ",emailid) 
         setEm(emailid) 
 
         setPhoto(result.data.message.imageurl)  
@@ -172,9 +246,11 @@ const ModPage = ()=>{
             }
             return false 
         }
-    
+
+        
         if(list2.includes(emailid))
         {
+            
             setMod(true) 
             return true 
         }
@@ -194,41 +270,6 @@ const ModPage = ()=>{
     }
 
     
-
-    const Follow = ()=>{
-
-        let answer = window.prompt('Last Step: Tell us a good reason why should you join the SubGreddiit?',
-        'I want to join this subgreddiit') 
-
-        axios.post('http://localhost:4000/gr/follow',{
-            name:details.name, 
-            email:em,
-            reason:answer, 
-        }).then((res)=>{
-            let result = res.data.added 
-
-            alert('result: ',res.data) 
-            window.location.reload() 
-        }).catch((err)=>{
-            console.log("Error") 
-        })
-    }
-
-    const UnFollow = ()=>{
-
-        axios.post('http://localhost:4000/gr/unfollow',{
-            name:details.name, 
-            email:em,
-        }).then((res)=>{
-            let result = res.data.added 
-
-            alert('result: ',res.data) 
-            window.location.reload() 
-        }).catch((err)=>{
-            console.log("Error") 
-        })
-    }
-
     const [list,setList] = useState([])
 
     
@@ -256,25 +297,14 @@ const ModPage = ()=>{
                
                 &nbsp;&nbsp;
                 {
+                    
                     mod === true ?
-                    <button className="btn btn-success my-3" disabled>You cannot leave this SubGrediit </button>
+                    <button className="btn btn-success my-3" disabled>You cannot leave this SubGrediit
+                    {
+                        console.log("mod: ",mod) 
+                    } </button>
                     :
-                    email === true && det === false? 
-                    <button className="btn btn-danger my-3" onClick={
-                        ()=>{
-                            UnFollow() 
-                        }
-                    }>Leave This SubGreddiit</button>
-                    :
-                    pending === false && det === false?
-                    <button className="btn btn-success my-3" onClick={()=>{
-                        Follow() 
-                    }}>Follow This SubGreddiit </button>
-                    :
-                    det === false ? 
-                    <button className="btn btn-success my-3" disabled>Pending Request </button>
-                    :
-                    <button className="btn btn-primary my-3" disabled>You cannot join this subGreddiit</button>
+                    ""
                 }
                 </div>
                 {
@@ -295,7 +325,7 @@ const ModPage = ()=>{
     <a class="nav-link" href={"/gr/" + details.name + "/followers"}>Followers</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link active" href={"/gr/" + details.name + "/mod"}>Moderators</a>
+    <a class="nav-link" href={"/gr/" + details.name + "/mod"}>Moderators</a>
   </li>
   {
     mod === true ? 
@@ -309,10 +339,10 @@ const ModPage = ()=>{
     <a class="nav-link" href={'/gr/' + details.name + "/reports"}>Reports </a>
   </li>:""
   }
-   {
+  {
     mod === true ? 
     <li class="nav-item">
-    <a class="nav-link" href={'/gr/' + details.name + "/stats"}>Stats </a>
+    <a class="nav-link active" href={'/gr/' + details.name + "/stats"}>Stats </a>
   </li>:""
   }
 </ul>
@@ -320,10 +350,10 @@ const ModPage = ()=>{
                     <div className="w-100 align-items-center" style={{
                         // display:'inline-block'
                     }}>
-                        {email === true ?
+                        {mod === true ?
                         <div>
                         
-                        <h5>Moderators of gr/{details.name}</h5>
+                        <h5>Stats of gr/{details.name}</h5>
                         </div>
                         : ""
 
@@ -334,43 +364,19 @@ const ModPage = ()=>{
                             <br></br>
                             
                     <div className="align-items-center justify-content-center" id='content'>
-                        <div className="border border-success">
-                            
+                        <div >
+                            <h3>Trend of Number Of Visits:</h3>
+                        <Line data={VisitStatReturn(xvisit,yvisit)} />
                         </div>
-                        {
-                            // Above will be the button that will help us to add the button 
-                            details.moderators.length === 0 ?
-                            <div style={{
-                                margin:'auto'
-                            }}>
-                            <p style={{
-                                textAlign:'center',
-                                
-                            }}>
-                                <img src={sad} />
-                                Looks like you don't have any moderators
-                            </p>
-                            </div>
-                            :
-                            // Display all the posts 
-                            <div>
-                                {list.map((e)=>{
-                                    return(
-                                        <div>
-                                        <a href={'/profile/' + e.username} style={{
-                                            textDecoration:'none'
-                                        }}>
-                                            <img src={e.profile} width='60' height='60' className="rounded-circle" />
-                                            &nbsp;
-                                            {e.username} 
-                                        </a>
-                                        <br></br>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        }
-                            
+                        <br></br>
+                        <div >
+                            <h3>Trend of Number Of Posts:</h3>
+                        <Line data={PostReturn(xvisit,xpost)} />
+                        </div>
+                        <div >
+                            <h3>Trend of Number Of Followers:</h3>
+                        <Line data={FollowerReturn(xfollow,xpost)} />
+                        </div>
                     </div>
                     </div>
                     
@@ -445,4 +451,4 @@ const ModPage = ()=>{
     )
 }
 
-export default ModPage 
+export default StatsPage 

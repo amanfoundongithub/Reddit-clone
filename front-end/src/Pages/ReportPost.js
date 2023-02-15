@@ -1,13 +1,15 @@
-import axios from "axios"
-import React,{useEffect, useState} from "react"
-import { useParams} from "react-router-dom"
+import React,{useState} from "react"
+import axios from 'axios' 
+import { useParams } from "react-router-dom"
 import NavBar from "../Components/Navbar/NavBar"
 import logo from '../Components/Images/create.png'
 import tags from '../Components/Images/tags.png'
 import sad from '../Components/Images/sad.png'
 import followers from '../Components/Images/followers.png'
 import mode from '../Components/Images/mod.png'
-// import pencil from '../Components/Images/pencil.png' 
+import accept from '../Components/Images/done.png'
+import reject from '../Components/Images/reject.png'
+
 
 const getDate = (date)=>{
     
@@ -18,12 +20,12 @@ const getDate = (date)=>{
 }
 
 
-const ModPage = ()=>{
-
-
+const ReportedPostPage = ()=>{
     let loggedin = false 
     
     const [mod,setMod] = useState(false) 
+
+    const [listit,setListIt] = useState([]) 
 
     if(window.localStorage.getItem('current-username'))
     {
@@ -47,12 +49,21 @@ const ModPage = ()=>{
         posts:[],
         createdOn: new Date(),
         banned:[],
+        reports:[],
     })
 
     const [editdesc,setED] = useState('')
     const [profURL,setProf] = useState('')
     const [covURL,setCovURL] = useState('') 
 
+    function update(E)
+    {
+        if(E.length === 0 || details.reports.length > 0)
+        {
+            return 
+        }
+        setListIt(E) 
+    }
     function newupdate(e)
     {
         // console.log("details:",details) 
@@ -64,25 +75,27 @@ const ModPage = ()=>{
         setED(e.description)
         setProf(e.profileImageURL)
         setCovURL(e.coverImageURL) 
-        console.log("e.mod:",e.moderators) 
-        axios.post('http://localhost:4000/gr/getdata',{
-        list2:e.pending,
-        list:e.moderators,  
-    }).then((response)=>{
 
-        setList(response.data.usernames)
-    }).catch((err)=>{
-        console.log("AXIOS ERROR")
-    })
+
+
+        // axios.post('http://localhost:4000/gr/usernameofreports',{
+        //     list1:e.reports, 
+        // }).then((resp)=>{
+        //     console.log("Resp: ",resp)
+
+        //     setListIt(resp.data.out) 
+        //     console.log('listit: ',listit)
+        // }).catch((err)=>{
+        //     console.log("AXIOS ERROR REQUEST")
+        // })
         
-        
-        CheckInItOrNot(e.followers,e.moderators,e.pending).then((val)=>{
+        CheckInItOrNot(e.followers,e.moderators,e.pending,e.reports).then((val)=>{
             MyEmail(val) 
         }).catch((err)=>{
             console.log("UNEXPECYE ERROR") 
             console.log(err) 
         })
-        // console.log("HERE")
+        console.log("HERE")
     }
 
     // var count = 0 
@@ -141,7 +154,8 @@ const ModPage = ()=>{
     const [em,setEm] = useState('') 
     const [pending,setPending] = useState(false) 
 
-    const CheckInItOrNot = async (list1,list2,list4)=>{
+
+    const CheckInItOrNot = async (list1,list2,list4,list5) =>{
         if(loggedin === false )
         {
             return false 
@@ -158,6 +172,16 @@ const ModPage = ()=>{
         setEm(emailid) 
 
         setPhoto(result.data.message.imageurl)  
+
+        
+
+        let result2 = await axios.post('http://localhost:4000/gr/usernameofreports',{
+            list1:list5, 
+        })
+
+        let find = result2.data.out
+        console.log(result2.data.out) 
+        setListIt(find)
 
 
         const func = ()=>{
@@ -207,7 +231,6 @@ const ModPage = ()=>{
         }).then((res)=>{
             let result = res.data.added 
 
-            alert('result: ',res.data) 
             window.location.reload() 
         }).catch((err)=>{
             console.log("Error") 
@@ -229,12 +252,128 @@ const ModPage = ()=>{
         })
     }
 
-    const [list,setList] = useState([])
 
-    
+     
     let det = details.banned.includes(em) 
 
-    // Make a new component: 
+    axios.post('http://localhost:4000/gr/usernameofreports',{
+            list1: details.reports,  
+        }).then((val)=>{
+            update(val.data.out) 
+        }).catch((err)=>{
+            console.log("Error: ",err) 
+        })
+
+    const DeleteThePost = (id,id2)=>{
+        console.log("id: ",id) 
+        axios.post('http://localhost:4000/post/deletepost',{
+            id: id,
+            report:id2, 
+        }).then((res)=>{
+            if(res.data.success === true)
+            {
+                alert('done')
+            }
+            else 
+            {
+                alert('undone')
+            }
+        }).catch((err)=>{
+            console.log("LODA AXIOS ERROR")
+        })
+    }
+
+    const BlockUser = (e)=>{
+        console.log("em: ",e)
+        axios.post('http://localhost:4000/gr/unfollow',{
+            name: name, 
+            email: e,
+        }).then((res)=>{
+            alert('Reported the user')
+            window.location.reload() 
+        })
+    }
+    
+    // Modal to represent the data
+
+    const ShowReportedPost = (props)=>{
+
+        const id = props.id 
+
+        const post = props.post 
+
+        console.log("post: ",post) 
+
+        console.log("id: ",id) 
+
+        const [arr,setArr] = useState({
+            title:'',
+             
+            content:'', 
+
+            createdAt:'', 
+            // Created by whom stores email address 
+            createdBy:'',
+            // Upvotes 
+            upvotes:[],
+            // downvotes 
+            downvotes:[],
+            // comments
+            comments:[],
+            
+        })
+
+        const LocalUpdate = (e)=>{
+            
+            if(e === null || e.title === '' || arr.title.length > 0)
+            {
+                return 
+            }
+            setArr(e) 
+        }
+        axios.post('http://localhost:4000/post/reportdata',{
+            id:post,
+        }).then((res)=>{
+            if(res.data.data === undefined)
+            {
+                return 
+            }
+            LocalUpdate(res.data.data) 
+        })
+        return(
+            <div>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target={"#exampleModal" + id} id={id}>
+                    Show The Post 
+                </button>
+
+
+                <div class="modal fade" id={"exampleModal" + id} tabindex="-1" aria-labelledby={"exampleModalLabel" + id} aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Post Description</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                
+                                <h3>Title: {arr.title}</h3>
+                                <p>{arr.content}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-info" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+</div>
+        )
+
+    }
+
+
+
+
+
     return(
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
@@ -253,7 +392,7 @@ const ModPage = ()=>{
                 }} width='80' height='80'/>
             
                 <span className="h4 my-4">&nbsp;&nbsp; gr/{details.name}&nbsp;&nbsp;</span>
-               
+              
                 &nbsp;&nbsp;
                 {
                     mod === true ?
@@ -295,18 +434,18 @@ const ModPage = ()=>{
     <a class="nav-link" href={"/gr/" + details.name + "/followers"}>Followers</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link active" href={"/gr/" + details.name + "/mod"}>Moderators</a>
+    <a class="nav-link" href={"/gr/" + details.name + "/mod"}>Moderators</a>
   </li>
   {
     mod === true ? 
     <li class="nav-item">
-    <a class="nav-link" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit </a>
+    <a class="nav-link" href={'/gr/' + details.name + "/editpage"}>Edit SubGreddiit</a>
   </li>:""
   }
    {
     mod === true ? 
     <li class="nav-item">
-    <a class="nav-link" href={'/gr/' + details.name + "/reports"}>Reports </a>
+    <a class="nav-link active" href={'/gr/' + details.name + "/reports"}>Reports</a>
   </li>:""
   }
    {
@@ -323,7 +462,7 @@ const ModPage = ()=>{
                         {email === true ?
                         <div>
                         
-                        <h5>Moderators of gr/{details.name}</h5>
+                        <h5>Reports in gr/{details.name}</h5>
                         </div>
                         : ""
 
@@ -335,11 +474,14 @@ const ModPage = ()=>{
                             
                     <div className="align-items-center justify-content-center" id='content'>
                         <div className="border border-success">
-                            
+                            {
+                                console.log("Detail:",details.reports) 
+                            }
                         </div>
                         {
+                            
                             // Above will be the button that will help us to add the button 
-                            details.moderators.length === 0 ?
+                            details.reports.length === 0 ?
                             <div style={{
                                 margin:'auto'
                             }}>
@@ -348,28 +490,97 @@ const ModPage = ()=>{
                                 
                             }}>
                                 <img src={sad} />
-                                Looks like you don't have any moderators
+                               &nbsp; No reports yet! You are all caught up! 
                             </p>
                             </div>
                             :
                             // Display all the posts 
                             <div>
-                                {list.map((e)=>{
+                               
+                                {details.reports.map((e,index)=>{
+                                    
+                                    if(listit.length === 0 ) 
+                                    {
+                                        return <></>
+                                    }
+                                    let element = listit[index] 
+
+                                
                                     return(
                                         <div>
-                                        <a href={'/profile/' + e.username} style={{
-                                            textDecoration:'none'
-                                        }}>
-                                            <img src={e.profile} width='60' height='60' className="rounded-circle" />
-                                            &nbsp;
-                                            {e.username} 
-                                        </a>
+                                        <div class="card">
+                                            <div class="card-header">
+                                                Report #{index + 1}
+                                            </div>
+                                            <div class="card-body">
+                                                {
+                                                    console.log("e: ",e) 
+                                                }
+                                                <h5 class="card-title">Reported By &nbsp; &nbsp; &nbsp;:&nbsp;
+                                                <img src={element.profilereporter} width='40' height='40' className="rounded-circle"/>&nbsp;
+                                                {element.usernamereporter}</h5>
+                                                <h5 class="card-title">Reported User&nbsp;&nbsp;: &nbsp;
+                                                <img src={element.profilereported} width='40' height='40' className="rounded-circle"/>&nbsp;
+                                                {element.usernamereported}</h5>
+                                                <p class="card-text">Concern: {e.Concern}</p>
+                                                <ShowReportedPost id={e._id} post={e.postID}/>
+                                                <br></br>
+                                                <h5>Select An Action: </h5>
+                                                {
+                                                    e.blockButton === false ? 
+                                                    <button className="btn btn-outline-danger"
+                                                onClick={()=>{
+                                                    DeleteThePost(e.postID,e._id) 
+                                                }}>
+                                                    Delete The Post
+                                                </button>
+                                                :
+                                                <button className="btn btn-outline-danger"
+                                                onClick={()=>{
+                                                    DeleteThePost(e.postID) 
+                                                }} disabled >
+                                                    Delete The Post
+                                                </button>
+                                                }
+                                                {
+                                                    e.blockButton === false ?
+                                                    <button className="btn btn-outline-danger"
+                                                onClick={()=>{
+                                                    BlockUser(e.reported)  
+                                                }}>
+                                                    Block User 
+                                                </button>
+                                                    :
+                                                    <button className="btn btn-outline-danger"
+                                                onClick={()=>{
+                                                    BlockUser(e.reported)  
+                                                }} disabled>
+                                                    Block User 
+                                                </button>
+                                                }
+                                                <button className="btn btn-outline-info" onClick={()=>{
+                                                    axios.post('http://localhost:4000/post/ignore',{
+                                                        post2:e._id,
+                                                        post:e.postID,
+                                                    }).then(()=>{
+                                                        window.location.reload() 
+                                                    })
+                                                }}>
+                                                    Ignore This Report
+                                                </button>
+                                            </div>
+                                            <div class="card-footer text-muted">
+                                                Reported On: <h5>{getDate(e.reportedOn)}</h5>
+                                                </div>
+                                        </div>
                                         <br></br>
                                         </div>
                                     )
                                 })}
                             </div>
                         }
+                        <br></br>
+                        
                             
                     </div>
                     </div>
@@ -445,4 +656,4 @@ const ModPage = ()=>{
     )
 }
 
-export default ModPage 
+export default ReportedPostPage

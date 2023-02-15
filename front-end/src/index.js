@@ -12,6 +12,9 @@ import EditPage from './Pages/EditPage';
 import FollowerPage from './Pages/FollowerPage';
 import ModPage from './Pages/ModeratorPage';
 import HomePage from './Pages/HomePage';
+import MySavedOnes from './Pages/MySavedPosts';
+import ReportedPostPage from './Pages/ReportPost';
+import StatsPage from './Pages/StatsPage';
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 
@@ -26,7 +29,10 @@ root.render(
             <Route path='/gr/:name'            element ={<Page />} />
             <Route path='/gr/:name/editpage'   element ={<EditPage />}/>
             <Route path='/gr/:name/followers'  element ={<FollowerPage />}/>
-            <Route path='/gr/:name/mod'        element ={<ModPage />}/> 
+            <Route path='/gr/:name/mod'        element ={<ModPage />}/>
+            <Route path='/mysaved'             element ={<MySavedOnes />}/> 
+            <Route path='/gr/:name/reports'    element ={<ReportedPostPage />}/>
+            <Route path='/gr/:name/stats'      element ={<StatsPage />} />
            </Routes>
   </BrowserRouter>
 );
