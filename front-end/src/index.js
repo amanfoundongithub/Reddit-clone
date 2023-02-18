@@ -15,6 +15,7 @@ import HomePage from './Pages/HomePage';
 import MySavedOnes from './Pages/MySavedPosts';
 import ReportedPostPage from './Pages/ReportPost';
 import StatsPage from './Pages/StatsPage';
+import MessagePage from './Pages/Message';
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
 

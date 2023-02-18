@@ -308,6 +308,12 @@ const EditPage = ()=>{
                                         <a class="nav-link" href={'/gr/' + details.name + "/reports"}>Reports </a>
                                     </li> : ""
                             }
+                            {
+                                mod === true ?
+                                    <li class="nav-item">
+                                        <a class="nav-link" href={'/gr/' + details.name + "/stats"}>Stats </a>
+                                    </li> : ""
+                            }
                         </ul>
                         <br></br>
 
