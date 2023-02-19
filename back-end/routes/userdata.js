@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const userSchema = require('../MongoStuff/Objects/user')
 const { dbConnect } = require('../MongoStuff/Connection/connection')
 const jwt = require('jsonwebtoken') 
-
+const chatSchema = require('../MongoStuff/Objects/chat') 
 require('dotenv').config() 
 
 
@@ -13,6 +13,8 @@ dbConnect()
 router.use(express.json());
 
 const user = mongoose.model("User",userSchema) 
+
+const chat = mongoose.model("Chat",chatSchema) 
 
 
 // Authenticate token
@@ -253,6 +255,7 @@ router.route('/check').post((req,res,next)=>{
             {
                 res.send({
                     message:'Unfollow',
+                    username: result.username,
                     transaction:true,
                 })
             }
@@ -260,6 +263,7 @@ router.route('/check').post((req,res,next)=>{
             {
                 res.send({
                     message:'Follow',
+                    username: result.username,
                     transaction:true,
                 })
             }
@@ -471,4 +475,64 @@ router.route('/removefollower').post((req,res,next)=>{
     
 })
 
+
+// BRING IN THE CHAT FEATURE !!!
+router.route('/chatroom').post((req,res,next)=>{
+    const to = req.body.to 
+    const from = req.body.from 
+    
+    chat.find({
+        participants:to,
+    }).then((arr)=>{
+
+        const val = arr.filter((e)=>{
+            return e.participants.includes(from) 
+        }) 
+
+        if(val.length > 0) 
+        {
+            
+            res.send({
+                id: val[0]._id,
+            })
+        }
+        else 
+        {
+            chat.create({
+              participants: [to,from]  
+            }).then((value)=>{
+                res.send({
+                    id:value._id 
+                })
+            })
+        }
+    }).catch((err)=>{
+        console.log("FATAL ERROR CREATING/FINDING ROOM") 
+    })
+
+})
+
+// Get the data from mongo
+router.route('/preparechat').post((req,res,next)=>{
+    const room = req.body.room 
+
+    chat.findById(room).then((val)=>{
+        if(val == null)
+        {
+            res.send({
+                chats: [],
+            })
+        }
+        else 
+        {
+            res.send({
+                chats: val.messages,
+            })
+        }
+    }).catch((err)=>{
+        res.send({
+            chats: undefined,
+        })
+    })
+})
 module.exports = router 

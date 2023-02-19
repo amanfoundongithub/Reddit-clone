@@ -13,6 +13,8 @@ const signup = require('./routes/signup')
 const userdata = require('./routes/userdata')
 const gre = require('./routes/sub_manage')
 const pageSchema = require('./MongoStuff/Objects/subgreddiit');
+const chatSchema = require('./MongoStuff/Objects/chat') 
+
 const post = require('./routes/post_manage')
 
 dbConnect() 
@@ -20,6 +22,7 @@ dbConnect()
 
 const user = mongoose.model("User",userSchema) 
 const gr = mongoose.model("Greddiits",pageSchema)
+const chat = mongoose.model("Chat",chatSchema) 
 
 var app = express();
 app.use(express.json())
@@ -43,7 +46,6 @@ server.listen(4001,()=>{
 const io = new Server(server,{
     cors:{
         origin:'http://localhost:3000',
-
     }
 })
 
@@ -61,8 +63,15 @@ io.on('connection',(socket)=>{
 
     // Send a message to a room 
     socket.on('send_message',(data)=>{
-        console.log("SENT BY ",data.author," at ",data.time) 
-        socket.to(data.room).emit('get_message',data) 
+        // Add to database also 
+        chat.findById(data.room).then((val)=>{
+            val.messages.push(data)
+            val.save().then(()=>{
+                console.log("SENT BY ",data.author," at ",data.time) 
+                socket.to(data.room).emit('get_message',data)
+            })
+        })
+         
     })
     // Disconnect from the server
     socket.on('disconnect',()=>{
