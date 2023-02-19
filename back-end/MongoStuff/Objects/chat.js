@@ -9,6 +9,7 @@ const chatSchema = new mongoose.Schema({
             author: String, 
             message: String, 
             time: String, 
+            date: String, 
     }]
 
     // Bas khatam 

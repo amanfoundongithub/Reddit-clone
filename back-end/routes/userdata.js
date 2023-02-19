@@ -184,8 +184,6 @@ router.route('/find').post((req,res,next)=>{
 
     const result = authenticateToken(req) 
 
-    console.log("request made") 
-
     user.findOne({
         username:username,
     }).then((val)=>{
@@ -198,6 +196,7 @@ router.route('/find').post((req,res,next)=>{
                     message:'LOGGED IN',
                     obtained:val,
                     transaction:true, 
+                    em: result.email,
                 })
             }
             else 
@@ -207,16 +206,18 @@ router.route('/find').post((req,res,next)=>{
                     message:'PROFILE',
                     obtained:val,
                     transaction:true,
+                    em: result.email,
                 })
             }
         }
         else if(result.message === 'NOT OK')
         {
-            console.log("NOT OK HUH") 
+            
             res.send({
                 message:'LOGGED IN',
                 obtained:val,
-                transaction:true 
+                transaction:true,
+                
             })
         }
         else 
@@ -242,7 +243,6 @@ router.route('/check').post((req,res,next)=>{
 
     const result = authenticateToken(req) 
 
-    console.log("username:",result.username) 
     user.findOne({
         email:result.email // get array of following 
     }).then((val)=>{
@@ -290,8 +290,6 @@ router.route('/follow').post((req,res,next)=>{
 
     const emailtofollow = req.body.email 
 
-    console.log("result.email: ",result.email) 
-    console.log("emailtofollow: ",emailtofollow) 
     user.findOne({
         email:result.email,
     }).then((val)=>{
@@ -329,20 +327,17 @@ router.route('/unfollow').post((req,res,next)=>{
 
     const result = authenticateToken(req) 
 
-    console.log("request result: ",result)  
     const res2 = result.email
-    console.log("Res2: ",res2)  
+  
 
     const emailtofollow = req.body.email 
 
-    console.log("email to be unfollowed: ",emailtofollow) 
-    console.log("email which is unfollowing:",result.username) 
     user.findOne({
         email:result.email,
     }).then((val)=>{
-        console.log("val.following:",val.following) 
+        
         val.following.splice(val.following.indexOf(emailtofollow),1) 
-        console.log("val.following: ",val.following) 
+        
         val.save().then(()=>{
             // Now add the follower to the email 
             user.findOne({
@@ -375,8 +370,7 @@ const HandleUsernames = async (req,res)=>{
     const list1 = req.body.list1 
     const list2 = req.body.list2
 
-    console.log("req: ",list1)
-    console.log("req: ",list2) 
+     
 
     let output = []
     let output2 = []
@@ -411,13 +405,9 @@ const HandleUsernames = async (req,res)=>{
 
     }
 }
-    // await loopsasync() 
-    // console.log("output1: ",output)
-    // console.log("output2: ",list2) 
+    
     loopsasync().then(()=>{
         
-        console.log("output1",output)
-        console.log("output2",output2) 
         res.send({
             usernames1:output,
             usernames2:output2,
@@ -446,7 +436,7 @@ router.route('/removefollower').post((req,res,next)=>{
         email:follower,
     }).then((val)=>{
         val.following.splice(val.following.indexOf(email),1) 
-        console.log("val.following: ",val.following) 
+        
         val.save().then(()=>{
             // Now add the follower to the email 
             user.findOne({
@@ -491,16 +481,56 @@ router.route('/chatroom').post((req,res,next)=>{
 
         if(val.length > 0) 
         {
-            
-            res.send({
-                id: val[0]._id,
+            let out = [to,from] 
+            let images = []
+
+            const asyncprofile = async()=>{
+            for(let i = 0 ; i < out.length ; i++)
+            {
+                let e = out[i] 
+
+                let profile = await user.findOne({
+                    username: e,
+                })
+
+                images.push(profile.imageurl) 
+            }
+        }
+            asyncprofile().then(()=>{
+                res.send({
+                    id: val[0]._id,
+                    images: images,
+                })
             })
+            
         }
         else 
         {
+
             chat.create({
               participants: [to,from]  
             }).then((value)=>{
+                let out = [to,from] 
+            let images = []
+ 
+            const asyncprofile = async()=>{
+            for(let i = 0 ; i < out.length ; i++)
+            {
+                let e = out[i] 
+
+                let profile = await user.findOne({
+                    username: e,
+                })
+
+                images.push(profile.imageurl) 
+            }
+        }
+            asyncprofile().then(()=>{
+                res.send({
+                    id: val[0]._id,
+                    images: images,
+                })
+            })
                 res.send({
                     id:value._id 
                 })

@@ -57,8 +57,7 @@ io.on('connection',(socket)=>{
     // Connect to the room 
     socket.on('join_room',(data)=>{
         socket.join(data) 
-        console.log("Connected to the room") 
-        console.log("user: ",socket.id," has joined the room!!! uWU")
+        // console.log("Connected to the room") 
     })
 
     // Send a message to a room 
