@@ -8,12 +8,14 @@ const socket = io.connect('http://localhost:4001')
 
 const MessagePage = (props)=>{
 
+    const [images,setImages] = useState([]) 
     axios.post('http://localhost:4000/userdata/chatroom',{
         to: props.to,
         from: props.from,
     }).then((res)=>{
         // console.log("ID Of the chatroom: ",res.data.id)
         sroom(res.data.id) 
+        setImages(res.data.images) 
     }).catch((err)=>{
         console.log("AXIOS ERROR") 
     })
@@ -27,11 +29,15 @@ const MessagePage = (props)=>{
 
     return(
         <div>
+            
             {
                 room.length === 0 ?
                 ""
                 :
-                <ChatComponent socket={socket} username={props.from} room={room}/>
+                images.length !== 0 ?
+                <ChatComponent socket={socket} username={props.from} room={room} images={images}/>
+                :
+                ""
             }
         </div>
     )

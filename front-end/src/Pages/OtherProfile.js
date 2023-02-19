@@ -7,6 +7,7 @@ import Footer from "../Components/Footer/Footer"
 import MessagePage from "./Message"
 
 
+
 const getDate = (date)=>{
     
     var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -76,8 +77,7 @@ const ViewProfile = ()=>{
     const [followers,setIt] = useState([])
     const [following,setIt2] = useState([])
 
-
-
+    const [em,userEm] = useState('') 
     useEffect(()=>{
 
     if(arr[0] === 0)
@@ -103,11 +103,16 @@ const ViewProfile = ()=>{
             if(result === null)
             {
                 alert('No such account exists!')
+                navigate('/profile') 
             }
             else 
             {
                 if(message === 'LOGGED IN')
                 {
+                    if(window.localStorage.getItem('myaccesstoken') !== null)
+                    {
+                        userEm(res.data.em)
+                    } 
                     axios.post('http://localhost:4000/userdata/usernames',{
                     list1:res.data.obtained.followers,
                     list2:res.data.obtained.following,
@@ -139,6 +144,7 @@ const ViewProfile = ()=>{
     // Check if the username is a followed or not 
 
     const [text,setText] = useState('') 
+    
     const [us,setUs] = useState('') 
     if(window.localStorage.getItem('myaccesstoken')){
     axios.post('http://localhost:4000/userdata/check',{
@@ -263,32 +269,27 @@ const ViewProfile = ()=>{
     const ChatModal = () => {
         return (
             <div>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chat">
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#chat">
                     Chat with {details.username} 
                 </button>
 
 
                 <div class="modal fade" id="chat" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
+                    <div class="modal-dialog modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h1 class="modal-title fs-5" id="exampleModalLabel">My Chats with {details.username}</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                               
                                {
                                 us.length != 0 ?
                                 <MessagePage to={details.username} from={us} />
                                 : 
                                 ""
                                }
-                                
-         
                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close Chat Box</button>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -340,7 +341,7 @@ const ViewProfile = ()=>{
                     </div>
             }
             {
-                window.localStorage.getItem("current-username") != null ?
+                window.localStorage.getItem("current-username") != null && details.following.includes(em) && details.followers.includes(em)? 
                 details.username != undefined ?
                 <ChatModal />
                 :
