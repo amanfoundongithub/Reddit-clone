@@ -1,4 +1,5 @@
 import React, { useState ,useEffect} from "react"
+import axios from "axios"
 
 const ChatComponent = (props)=>{
 
@@ -8,13 +9,19 @@ const ChatComponent = (props)=>{
 
     const room = props.room 
 
-    const [message,setMessage] = useState('')
+    axios.post('http://localhost:4000/userdata/preparechat',{
+        room: room,
+    }).then((res)=>{
+        sendRes(res.data.chats) 
+    })
 
+    const [message,setMessage] = useState('')
 
     const SendMessage = async ()=>{
         if(message.length === 0)
         {
-
+            alert('MADARCHOD')
+            return 
         }
 
         const messageData = {
@@ -23,42 +30,41 @@ const ChatComponent = (props)=>{
             message: message, 
             time: new Date().getHours() + ":" + new Date().getMinutes(),
         }
-        
+
         await socket.emit('send_message',messageData) 
-        sendRes([...res,messageData]) 
+
+        sendRes(()=>[...res,messageData]) 
+
         setMessage('') 
     }
 
     const [res,sendRes] = useState([]) 
-    useEffect(()=>{
+
+
+        console.log("res before useEffect: ",res) 
         socket.on('get_message',(data)=>{
-            console.log("Bruh")
-            console.log(data) 
-            sendRes([...res,data]) 
+            sendRes(()=>[...res,data]) 
         })
-    },[socket])
+   
 
     return(
         <div>
-            <div>
-                Chat Header
-            </div>
             <div>
                 {
                     res.length === 0 ?
                     ""
                     :
-                    res.map((e)=>{
+                    res.map((e,index)=>{
                         return(
-                            <p>{e.message}</p>
+                            <p key={index}>{e.message}</p>
                         )
                     })
                 }
+                
             </div>
             <div>
-                Chat Footer
                 <input value={message} onChange={(e)=>setMessage(e.target.value)} />
-                <button onClick={SendMessage}>Send </button>
+                <button onClick={SendMessage}>Send</button>
             </div>
         </div>
     )

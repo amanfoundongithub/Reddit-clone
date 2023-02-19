@@ -4,6 +4,7 @@ import { useNavigate, useParams} from "react-router-dom"
 import { useState } from "react"
 import NavBar from "../Components/Navbar/NavBar"
 import Footer from "../Components/Footer/Footer"
+import MessagePage from "./Message"
 
 
 const getDate = (date)=>{
@@ -16,10 +17,9 @@ const getDate = (date)=>{
 
 function getAge(dateString) {
     dateString.replace('-','')
-    console.log(dateString)
     var today = new Date();
     var birthDate = new Date(dateString);
-    console.log("birthdate",birthDate) 
+    
     var age = today.getFullYear() - birthDate.getFullYear();
     var m = today.getMonth() - birthDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -112,7 +112,7 @@ const ViewProfile = ()=>{
                     list1:res.data.obtained.followers,
                     list2:res.data.obtained.following,
                 }).then((response)=>{
-                    console.log("response:",response)
+                    
                     setDetails(result) 
                     setIt(response.data.usernames1) 
                     setIt2(response.data.usernames2) 
@@ -139,14 +139,16 @@ const ViewProfile = ()=>{
     // Check if the username is a followed or not 
 
     const [text,setText] = useState('') 
+    const [us,setUs] = useState('') 
     if(window.localStorage.getItem('myaccesstoken')){
     axios.post('http://localhost:4000/userdata/check',{
         token:'BEARER '+window.localStorage.getItem('myaccesstoken'),
         email:details.email,
     }).then((res)=>{
-        
+        const us2 = res.data.username 
         const message = res.data.message
         setText(message) 
+        setUs(us2) 
 
     }).catch((err)=>{
         console.log("Error in AXIOS request") 
@@ -161,7 +163,6 @@ const ViewProfile = ()=>{
         const list = props.list 
         const id = props.id 
     
-        console.log("inside modality: ",list) 
     
             return(
                 <div className="container">
@@ -236,7 +237,6 @@ const ViewProfile = ()=>{
 
             const result = message.data.message 
 
-            console.log("result : ",result) 
 
             window.location.reload() 
         }).catch((err)=>{
@@ -252,13 +252,50 @@ const ViewProfile = ()=>{
 
             const result = message.data.message 
 
-            console.log("result : ",result) 
-
             window.location.reload() 
         }).catch((err)=>{
             console.log("AXIOS REQUEST ERROR")
         })
     }
+
+
+    // Make a modal for chat 
+    const ChatModal = () => {
+        return (
+            <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#chat">
+                    Chat with {details.username} 
+                </button>
+
+
+                <div class="modal fade" id="chat" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">My Chats with {details.username}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                               
+                               {
+                                us.length != 0 ?
+                                <MessagePage to={details.username} from={us} />
+                                : 
+                                ""
+                               }
+                                
+         
+                           </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close Chat Box</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return(
         <div className="App">
         <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
@@ -302,7 +339,15 @@ const ViewProfile = ()=>{
 
                     </div>
             }
-            
+            {
+                window.localStorage.getItem("current-username") != null ?
+                details.username != undefined ?
+                <ChatModal />
+                :
+                ""
+                :
+                ""
+            }
             </div>
             <div className="col my-4 display-4 justify-content-center" id="display basic info">
                 <p className="h3">{details.username}'s Stats:</p>

@@ -1,36 +1,38 @@
 import React, { useState } from "react"
-import { useSearchParams } from "react-router-dom"
 import io from 'socket.io-client'
 import ChatComponent from "../Components/Chat/chat"
+import axios from "axios"
 
 // Connect to the Socket.io server 
 const socket = io.connect('http://localhost:4001') 
 
-const MessagePage = ()=>{
+const MessagePage = (props)=>{
 
-    const [username,setUsername] = useState('') 
-    const [room,setRoom] = useState('') 
+    axios.post('http://localhost:4000/userdata/chatroom',{
+        to: props.to,
+        from: props.from,
+    }).then((res)=>{
+        // console.log("ID Of the chatroom: ",res.data.id)
+        sroom(res.data.id) 
+    }).catch((err)=>{
+        console.log("AXIOS ERROR") 
+    })
 
-    const joinRoom = ()=>{
-        if(username.length === 0 )
-        {
+    const [room,setRoom] = useState('')
 
-        }
-
-        socket.emit("join_room",room)
+    const sroom = (room)=>{
+        setRoom(room) 
+        socket.emit("join_room",room) 
     }
-
-
 
     return(
         <div>
-            <h1>Chat</h1> 
-            <input type='text' value={username} onChange={(e)=>setUsername(e.target.value)} />
-            <input type='text' value={room} onChange={(e)=>setRoom(e.target.value)} />
-            <br></br>
-            <button onClick={joinRoom}>TJoin</button>
-
-            <ChatComponent socket={socket} username={username} room={room}/>
+            {
+                room.length === 0 ?
+                ""
+                :
+                <ChatComponent socket={socket} username={props.from} room={room}/>
+            }
         </div>
     )
 }

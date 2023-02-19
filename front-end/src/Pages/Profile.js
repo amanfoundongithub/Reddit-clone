@@ -180,94 +180,96 @@ const Profile = ()=>{
 
     console.log("inside modality: ",list) 
 
-    const RemoveFollower = (emailoffollower)=>{
+        const RemoveFollower = (emailoffollower) => {
 
-        axios.post('http://localhost:4000/userdata/removefollower',{
-            follower: emailoffollower, 
-            email : details.email,
-        }).then((res)=>{
-            if(res.data.success === true)
-            {
-                alert('removed from follower')
-                window.location.reload() 
-            }
-        })
-    }
+            axios.post('http://localhost:4000/userdata/removefollower', {
+                follower: emailoffollower,
+                email: details.email,
+            }).then((res) => {
+                if (res.data.success === true) {
+                    alert('removed from follower')
+                    window.location.reload()
+                }
+            })
+        }
 
-        return(
+        return (
             <div className="container">
                 {/* <!-- Button trigger modal --> */}
-                {props.title === 'Followers' ? 
-    <a type="button" className="bg-transparent" data-bs-toggle="modal" data-bs-target={"#"+id} style={{
-        textDecoration:'none',
-        fontSize:'25px',
-        color:'black'
-    }}>
-    &#128535; {details.followers.length} Followers
-    </a>
-    :
-    <a type="button" className="bg-transparent" data-bs-toggle="modal" data-bs-target={"#"+id} style={{
-        textDecoration:'none' ,
-        fontSize:'25px',
-        color:'black'
-    }}>
-    &#128527; {details.following.length} Following 
-      </a>
-    }
-    
-    
-    <div className="modal fade" id={id} tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-          {props.title === 'Followers' ? 
-    <h1 className="modal-title fs-5" id="exampleModalLabel">
-    Followers
-    </h1>
-    :
-    <h1 className="modal-title fs-5" id="exampleModalLabel">
-    Following 
-      </h1>
-    }
-            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div className="modal-body">
-            {
-                list.length !== 0 ? 
-                list.map((ele,index)=>{
-                    return (<div className="container"><a type="button" className="bg-transparent" style={{
-                        textDecoration:'none' ,
-                        fontSize:'25px',
-                        color:'black'
-                    }}
-                    href={'/profile/' + ele} >{ele} &nbsp;</a>
-                    {
-                        props.title === 'Followers' ?
-                        <button className="btn btn-outline-danger" onClick={
-                            ()=>{
-                                RemoveFollower(details.followers[index]) 
-                            }
-                        }>Remove as follower</button>
-                        :
-                        ""
-                    }
-                    
-                    <br></br>
-                    </div>)
-                })
-                :
-                <p>Oops! No {props.title} </p>
-            }
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
+                {props.title === 'Followers' ?
+                    <a type="button" className="bg-transparent" data-bs-toggle="modal" data-bs-target={"#" + id} style={{
+                        textDecoration: 'none',
+                        fontSize: '25px',
+                        color: 'black'
+                    }}>
+                        &#128535; {details.followers.length} Followers
+                    </a>
+                    :
+                    <a type="button" className="bg-transparent" data-bs-toggle="modal" data-bs-target={"#" + id} style={{
+                        textDecoration: 'none',
+                        fontSize: '25px',
+                        color: 'black'
+                    }}>
+                        &#128527; {details.following.length} Following
+                    </a>
+                }
+
+
+                <div className="modal fade" id={id} tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                {props.title === 'Followers' ?
+                                    <h1 className="modal-title fs-5" id="exampleModalLabel">
+                                        Followers
+                                    </h1>
+                                    :
+                                    <h1 className="modal-title fs-5" id="exampleModalLabel">
+                                        Following
+                                    </h1>
+                                }
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                {
+                                    list.length !== 0 ?
+                                        list.map((ele, index) => {
+                                            return (<div className="container"><a type="button" className="bg-transparent" style={{
+                                                textDecoration: 'none',
+                                                fontSize: '25px',
+                                                color: 'black'
+                                            }}
+                                                href={'/profile/' + ele} >{ele} &nbsp;</a>
+                                                {
+                                                    props.title === 'Followers' ?
+                                                        <button className="btn btn-outline-danger" onClick={
+                                                            () => {
+                                                                RemoveFollower(details.followers[index])
+                                                            }
+                                                        }>Remove as follower</button>
+                                                        :
+                                                        ""
+                                                }
+
+                                                <br></br>
+                                            </div>)
+                                        })
+                                        :
+                                        <p>Oops! No {props.title} </p>
+                                }
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         )
     }
+
+
+    
     return(
         details.password.length !== 0 ?
         <div className="App">
@@ -359,6 +361,7 @@ const Profile = ()=>{
                             </div>
                             
                         </div>
+           
             </div>
             <div className="col my-4 display-4 justify-content-center" id="display basic info">
                 <p className="h3">{details.username}'s Stats:</p>
@@ -368,6 +371,7 @@ const Profile = ()=>{
                 
                 <Modality title='Followers' list={followers} id="followers"/> 
                 <Modality title='Following' list={following} id="following"/>
+           
                 {/* <Modal /> */}
             </div>
             

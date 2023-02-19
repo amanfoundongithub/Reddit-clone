@@ -15,7 +15,7 @@ const HomePage = ()=>{
     const [list,setList] = useState([])
 
     const HandleInput = ()=>{
-        console.log("listtag: ",listtag) 
+        
         axios.post('http://localhost:4000/gr/search',{
             search:search,
             list:listtag,
