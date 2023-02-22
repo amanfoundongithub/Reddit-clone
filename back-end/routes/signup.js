@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken') 
 
 
-router = express.Router() 
+let router = express.Router() 
 
 require('dotenv').config() 
 
@@ -115,10 +115,15 @@ router.route('/create').post((req,res,next)=>{
 /* SIGN IN IS HANDLED HERE */ 
 
 // Returns id in mongo if it exists and null if it does not  
-const verifyuser = async (username,password)=>{
+const verifyuser = async (username,password,param)=>{
 
     // Verifies the user in database
+    if(param === true)
+    {
+        const user2 = await user.findOne({email: username}) 
 
+        return user2._id
+    }
     const user2 = await user.findOne({username:username}) 
 
     // console.log(user2) 
@@ -140,7 +145,17 @@ const verifyuser = async (username,password)=>{
 
 }
 
-const getId = async (username)=>{
+const getId = async (username,param)=>{
+
+    if(param === true)
+    {
+        const doc = await user.findOne({email:username}) 
+
+    return {
+        id: doc._id,
+        email:doc.email,
+    }
+    }
 
     const doc = await user.findOne({username:username}) 
 
@@ -153,14 +168,14 @@ const getId = async (username)=>{
 
 
 router.route('/signin').post((req,res,next)=>{
-    verifyuser(req.body.username,req.body.password).then((found)=>{
+    verifyuser(req.body.username,req.body.password,req.body.google).then((found)=>{
          // gENERATE AN ACCESS TOKEN 
 
         let object2 = {
             id:undefined 
         }
 
-        getId(req.body.username).then((lol)=>{
+        getId(req.body.username,req.body.google).then((lol)=>{
             object2 = {
                 id:lol.id,
                 email:lol.email,
