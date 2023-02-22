@@ -27,6 +27,8 @@ const ReportedPostPage = ()=>{
 
     const [listit,setListIt] = useState([]) 
 
+    const [loaded,setLoaded] = useState(false) 
+
     if(window.localStorage.getItem('current-username'))
     {
         loggedin  = true 
@@ -75,22 +77,10 @@ const ReportedPostPage = ()=>{
         setED(e.description)
         setProf(e.profileImageURL)
         setCovURL(e.coverImageURL) 
-
-
-
-        // axios.post('http://localhost:4000/gr/usernameofreports',{
-        //     list1:e.reports, 
-        // }).then((resp)=>{
-        //     console.log("Resp: ",resp)
-
-        //     setListIt(resp.data.out) 
-        //     console.log('listit: ',listit)
-        // }).catch((err)=>{
-        //     console.log("AXIOS ERROR REQUEST")
-        // })
         
         CheckInItOrNot(e.followers,e.moderators,e.pending,e.reports).then((val)=>{
-            MyEmail(val) 
+            MyEmail(val)
+            setLoaded(true)  
         }).catch((err)=>{
             console.log("UNEXPECYE ERROR") 
             console.log(err) 
@@ -375,6 +365,7 @@ const ReportedPostPage = ()=>{
 
 
     return(
+        loaded === true ?
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
             <div className="container-fluid">
@@ -651,7 +642,13 @@ const ReportedPostPage = ()=>{
                 </div>
                 
             </div>
-            
+            :
+            <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading Your SubGreddiits, please wait...</p>
+        </div>
         
     )
 }

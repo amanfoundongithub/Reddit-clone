@@ -20,6 +20,8 @@ const Modal = ()=>{
     const [tags,setTags] = useState([]) 
     const [ban,setBan] = useState([])
 
+    
+
     const HandleSubmit = ()=>{
         let cute=  name.trim()
         let cute2 = desc.trim()
@@ -118,7 +120,7 @@ const Modal = ()=>{
 }
 
 const MySubGreddits = ()=>{
-
+    const [loaded,setLoaded] = useState(false) 
     const navigate = useNavigate() 
 
     useEffect(()=>{
@@ -170,12 +172,13 @@ const MySubGreddits = ()=>{
 
     function changedata(e){
         setDetails(e) 
-
+        
         // Now set an axios request to get the usernames
         axios.post('http://localhost:4000/gr/get',{
             list:e.created, 
         }).then((res)=>{
             setArr(res.data.list) 
+            setLoaded(true) 
         }).catch((err)=>{
             console.log("Error") 
         })
@@ -220,6 +223,7 @@ const MySubGreddits = ()=>{
 
 
     return(
+        loaded === true ?
         <div className="container-fluid">
             <NavBar listofmenu = {listofmenu} isdropdown={false} issearch={false} />
             <div className="row">
@@ -265,6 +269,13 @@ const MySubGreddits = ()=>{
             </div>
 
             </div>
+        </div>
+        :
+        <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading Your SubGreddiits, please wait...</p>
         </div>
     )
 }

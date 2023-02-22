@@ -22,6 +22,7 @@ const getDate = (date)=>{
 
 const FollowerPage = ()=>{
 
+    const [loaded,setLoaded] = useState(false) 
 
     let loggedin = false 
     
@@ -98,6 +99,7 @@ const FollowerPage = ()=>{
         
         CheckInItOrNot(e.followers,e.moderators,e.pending).then((val)=>{
             MyEmail(val) 
+            setLoaded(true) 
         }).catch((err)=>{
             console.log("UNEXPECYE ERROR") 
             console.log(err) 
@@ -280,6 +282,7 @@ const FollowerPage = ()=>{
     let det = details.banned.includes(em) 
     // Make a new component: 
     return(
+        loaded === true ? 
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
             <div className="container-fluid">
@@ -361,6 +364,7 @@ const FollowerPage = ()=>{
   }
 </ul>
 <br></br>
+                    
                     <div className="w-100 align-items-center" style={{
                         // display:'inline-block'
                     }}>
@@ -620,7 +624,13 @@ const FollowerPage = ()=>{
                 </div>
                 
             </div>
-            
+            :
+            <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading Followers, please wait...</p>
+        </div>
         
     )
 }

@@ -15,10 +15,10 @@ const getDate = (date)=>{
 
 function getAge(dateString) {
     dateString.replace('-','')
-    console.log(dateString)
+
     var today = new Date();
     var birthDate = new Date(dateString);
-    console.log("birthdate",birthDate) 
+    
     var age = today.getFullYear() - birthDate.getFullYear();
     var m = today.getMonth() - birthDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
@@ -29,10 +29,11 @@ function getAge(dateString) {
 
 const Profile = ()=>{
 
+    const [loaded,setLoaded] = useState(false) 
     const navigate = useNavigate() 
 
     useEffect(()=>{
-        console.log("username: ",window.localStorage.getItem("current-username")) 
+        
         if(window.localStorage.getItem("current-username") !== 'yes')
         {
             navigate('/signin')
@@ -98,14 +99,15 @@ const Profile = ()=>{
             return 
         }
         setDetails(e);
+        setLoaded(true) 
         setFollowers(list1)
         setFollowing(list2) 
-
+        
     }
 
     var id = window.localStorage.getItem("current-username") 
 
-    console.log("id : ",id) 
+    
 
         // if not return details
         axios.post('http://localhost:4000/userdata/profile',{
@@ -119,7 +121,7 @@ const Profile = ()=>{
                     list1:res.data.message.followers,
                     list2:res.data.message.following,
                 }).then((response)=>{
-                    console.log("response:",response)
+                    
                     changedata(res.data.message,response.data.usernames1,response.data.usernames2);
                 })
                 // changedata(res.data.message,res.data.message.followers,res.data.message.following); 
@@ -178,7 +180,6 @@ const Profile = ()=>{
     const list = props.list 
     const id = props.id 
 
-    console.log("inside modality: ",list) 
 
         const RemoveFollower = (emailoffollower) => {
 
@@ -187,8 +188,7 @@ const Profile = ()=>{
                 email: details.email,
             }).then((res) => {
                 if (res.data.success === true) {
-                    alert('removed from follower')
-                    window.location.reload()
+                   window.location.reload() 
                 }
             })
         }
@@ -269,8 +269,8 @@ const Profile = ()=>{
     }
 
 
-    
     return(
+        loaded === true ?
         details.password.length !== 0 ?
         <div className="App">
         <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
@@ -378,6 +378,13 @@ const Profile = ()=>{
         </div>
         <Footer />
         </div>: navigate('/signin') 
+        :
+        <div>
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading Profile, please wait...</p>
+        </div>
     )
 }
 

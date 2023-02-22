@@ -74,6 +74,7 @@ const MySavedOnes = ()=>{
     const [arr,setArr] = useState([])
     const [det,setDet] = useState([]) 
 
+    const [loaded,setLoaded] = useState(false) 
     
     function changedata(e){
         setDetails(e) 
@@ -87,7 +88,7 @@ const MySavedOnes = ()=>{
             console.log("res.data.list: ",res.data.list) 
             setDet(res.data.list)
             setArr(res.data.list) 
-        
+            setLoaded(true) 
         }).catch((err)=>{
             console.log("Error") 
         })
@@ -132,6 +133,7 @@ const MySavedOnes = ()=>{
 
 
     return(
+        loaded === true ? 
         <div className="container-fluid">
             <NavBar listofmenu = {listofmenu} isdropdown={false} issearch={false} />
             <div className="row">
@@ -171,6 +173,13 @@ const MySavedOnes = ()=>{
             </div>
 
             </div>
+        </div>
+        :
+        <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading  Your Saved Posts, please wait...</p>
         </div>
     )
 }

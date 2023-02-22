@@ -24,6 +24,7 @@ const ModPage = ()=>{
     let loggedin = false 
     
     const [mod,setMod] = useState(false) 
+    const [loaded,setLoaded] = useState(false) 
 
     if(window.localStorage.getItem('current-username'))
     {
@@ -78,6 +79,7 @@ const ModPage = ()=>{
         
         CheckInItOrNot(e.followers,e.moderators,e.pending).then((val)=>{
             MyEmail(val) 
+            setLoaded(true) 
         }).catch((err)=>{
             console.log("UNEXPECYE ERROR") 
             console.log(err) 
@@ -236,6 +238,7 @@ const ModPage = ()=>{
 
     // Make a new component: 
     return(
+        loaded === true ? 
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
             <div className="container-fluid">
@@ -440,7 +443,13 @@ const ModPage = ()=>{
                 </div>
                 
             </div>
-            
+            :
+            <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading Your SubGreddiits, please wait...</p>
+        </div>
         
     )
 }

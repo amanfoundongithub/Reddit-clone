@@ -7,9 +7,12 @@ import SignUp from './SignUp'
 import Footer from '../Components/Footer/Footer'
 import axios from 'axios'
 
+// Hehe imports
+import {getAdditionalUserInfo, getAuth,GoogleAuthProvider,signInWithPopup} from 'firebase/auth' 
+import {auth,provider} from '../Components/firebase-info'
+import google from '../Components/Images/google.png' 
+
 const SignIn = (props)=>{
-
-
 
     window.localStorage.setItem("admin","useremail@gmail.com")
     window.localStorage.setItem("adminfname","Admin")
@@ -54,8 +57,6 @@ const SignIn = (props)=>{
 
     // Handles submission after the Sign In is tried to be done 
     var HandleSignIn = (e)=>{
-
-    
         e.preventDefault()
 
 
@@ -91,6 +92,56 @@ const SignIn = (props)=>{
         return 
     }
 
+    const GoogleSignIn = ()=>{
+        signInWithPopup(auth,provider).then((data)=>{
+            const datanew = getAdditionalUserInfo(data) 
+
+            if(datanew.isNewUser === false)
+            {
+                axios.post('http://localhost:4000/signin/signin', {
+                    username: datanew.profile.email,
+                    google: true,
+                }).then((res) => {
+                    const recieved = res.data.message
+
+                    console.log("response from the server: ", res)
+                    if (recieved === null) {
+                        alert("ALERT : Either the username or the password is incorrect! Please try again !!!")
+                        return
+                    }
+                    else if (recieved === undefined) {
+                        alert("ALERT : Database failure error. Try again after a few moments...")
+                        return
+                    }
+
+                    // Now alert 
+                    window.localStorage.setItem("myaccesstoken", res.data.accesstoken)
+                    window.localStorage.setItem("current-username", "yes")
+                    navigate('/profile')
+                    console.log("Success")
+                }).catch((err) => {
+                    console.log("Error sending data")
+                    console.log(err)
+                })
+
+                return
+            }
+            else
+            {
+                let conf = window.confirm("It seems you does not have an account in the system. Do you want to go to signup page?")
+
+                if(conf === true)
+                {
+                    functional(false)  
+                }
+                else 
+                {
+                    return 
+                }
+            }
+        })
+    }
+
     const formstyle = {
         backgroundImage:`url('https://miro.medium.com/max/1400/1*Botc02OEsqDHA026jiYV5A.png')`,
         backgroundRepeat:'no-repeat',
@@ -106,7 +157,7 @@ const SignIn = (props)=>{
              <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title} variable={variable} func={functional} black={true}/>
         <div className='container-fluid' >
             <div className="row justify-content-center align-items-center">
-            <form className="w-50 needs-validation my-5" style={formstyle} onSubmit={HandleSignIn} method='POST'>
+            <form className="w-50 needs-validation my-5" style={formstyle}>
             <h3 className='display-6 my-4'>Glad You Are Back! &#128522;</h3>
             <h5 style={{fontStyle:'italic'}}>But... before we start, let's make sure its really you...</h5>
             <EmailPassword emailID={email} setemail={setEmail} password={pass} setPassword={setPass} needconf={false} tag={"Enter The Username:"}/>
@@ -116,11 +167,15 @@ const SignIn = (props)=>{
                 checkvalidity() === true ?
                 <button type="submit" className="btn btn-outline-info w-50" disabled>Submit</button>
                 :
-                <button type="submit" className="btn btn-success w-50">Submit</button>
+                <button type="submit" className="btn btn-success w-50" onClick={HandleSignIn}>Submit</button>
             }
             </div>
-            <br></br><br></br>
+            <br></br>
+            <p>---- Or ----</p>
+            <button className='btn btn-outline-secondary w-50 my-4' onClick={()=>{GoogleSignIn()}}>
+                <img src={google} height='40' width='40'/> &nbsp;Sign In With Google</button>
             </form>
+            
             <div className="row justify-content-center align-items-center">
             <button className='btn btn-danger w-50 my-4' onClick={()=>{functional(false)}}>Click Here If You Don't Have An Account</button>
             </div>

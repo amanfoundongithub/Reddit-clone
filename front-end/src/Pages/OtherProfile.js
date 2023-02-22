@@ -33,8 +33,10 @@ function getAge(dateString) {
 const ViewProfile = ()=>{
 
     // Get username from the string 
-    const {username} = useParams() 
+    const {username} = useParams()
 
+
+    const [loaded,setLoaded] = useState(false) 
 
     var arr = [0]
 
@@ -121,6 +123,7 @@ const ViewProfile = ()=>{
                     setDetails(result) 
                     setIt(response.data.usernames1) 
                     setIt2(response.data.usernames2) 
+                    setLoaded(true) 
                     
                 })
                     return 
@@ -269,7 +272,7 @@ const ViewProfile = ()=>{
     const ChatModal = () => {
         return (
             <div>
-                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#chat">
+                <button type="button" class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#chat">
                     Chat with {details.username} 
                 </button>
 
@@ -298,6 +301,7 @@ const ViewProfile = ()=>{
     }
 
     return(
+        loaded === true ?
         <div className="App">
         <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
         <div className="row">
@@ -362,6 +366,13 @@ const ViewProfile = ()=>{
         </div>
         <Footer />
         </div> 
+        :
+        <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading {username}'s profile, please wait...</p>
+        </div>
     )
 }
 

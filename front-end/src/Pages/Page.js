@@ -22,6 +22,8 @@ const getDate = (date)=>{
 const Page = ()=>{
 
 
+    const [loaded,setLoaded] = useState(false) 
+
     let loggedin = false 
     
     const [mod,setMod] = useState(false) 
@@ -50,9 +52,6 @@ const Page = ()=>{
         banned:[],
     })
 
-    // const [editdesc,setED] = useState('')
-    // const [profURL,setProf] = useState('')
-    // const [covURL,setCovURL] = useState('') 
     const [url,setUrl] = useState([]) 
 
 
@@ -64,14 +63,11 @@ const Page = ()=>{
         {
             return 
         }
-        setDetails(e) 
-        // setED(e.description)
-        // setProf(e.profileImageURL)
-        // setCovURL(e.coverImageURL) 
+        setDetails(e)  
         
         CheckInItOrNot(e.followers,e.moderators,e.posts,e.pending).then((val)=>{
             MyEmail(val) 
-            // DoStuff(e) 
+            setLoaded(true)  
         }).catch((err)=>{
             console.log("UNEXPECYE ERROR") 
             console.log(err) 
@@ -331,11 +327,7 @@ const Page = ()=>{
                             }
 
                             console.log("s: ",s) 
-                            // for(let k = 0 ; k < temp.length ; k++)
-                            // {
-                            //     temp[k].replace(details.bannedKeywords[i],s) 
-                            //     ans = ans  + temp[k] + ' '
-                            // }   
+                            
                             bod = bod.replace(details.bannedKeywords[i],s) 
                         }
 
@@ -382,6 +374,7 @@ const Page = ()=>{
 
     // Make a new component: 
     return(
+        loaded === true ? 
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
             <div className="container-fluid">
@@ -503,7 +496,6 @@ const Page = ()=>{
 
                                 {
                                     details.posts.reverse().map((val,index)=>{
-                                        console.log("url : ",url)
                                         if(url.length === 0)
                                         {
                                             return <></>
@@ -592,7 +584,13 @@ const Page = ()=>{
                 </div>
                 
             </div>
-        
+            :
+            <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading gr/{name}, please wait...</p>
+        </div>
     )
 }
 

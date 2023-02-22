@@ -10,6 +10,11 @@ import SignIn from './SignIn'
 import Footer from '../Components/Footer/Footer'
 import axios from 'axios' 
 
+// Hehe imports
+import {getAdditionalUserInfo, getAuth,GoogleAuthProvider,signInWithPopup} from 'firebase/auth' 
+import {auth,provider} from '../Components/firebase-info'
+import google from  '../Components/Images/google.png' 
+
 const getCurrentDate = ()=>{
     var today = new Date()
     var dd = today.getDate()
@@ -214,6 +219,36 @@ const SignUp = (props)=>{
     alignContent:'center',
     textAlign:'center',
     }
+
+    const [gsignin,setIG] = useState(false) 
+    const GoogleSignUp = ()=>{
+        signInWithPopup(auth,provider).then((data)=>{
+            const datanew = getAdditionalUserInfo(data) 
+
+            if(datanew.isNewUser === true)
+            {
+                setEmail(datanew.profile.email) 
+                setfname(datanew.profile.given_name) 
+                setlname(datanew.profile.family_name) 
+
+                setIG(true) 
+                setCreated(true) 
+            }
+            else
+            {
+                let conf = window.confirm("It seems you already have an account in the system. Do you want to go to signin page?")
+
+                if(conf === true)
+                {
+                    setSignIn(true) 
+                }
+                else 
+                {
+                    return 
+                }
+            }
+        })
+    }
     return(
         created === false  && signin === false? 
         <div className='App' style={mydiv}>
@@ -248,8 +283,12 @@ const SignUp = (props)=>{
                 <button type="submit" className="btn btn-success w-50">Submit</button>
             }
             </div>
-            <br></br><br></br>
+            <br></br>
+            <p>---- Or ----</p>
+            <button className='btn btn-outline-secondary w-50 my-4' onClick={()=>{GoogleSignUp()}}>
+                <img src={google} height='40' width='40'/> &nbsp;Sign Up With Google</button>
             </form>
+            
             <div class="row justify-content-center align-items-center">
             <button className='btn btn-danger w-50 my-4' onClick={()=>{setSignIn(true)}}>Click Here If You Already Have An Account</button></div>
             </div>
@@ -262,7 +301,21 @@ const SignUp = (props)=>{
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title} variable={signin} func={setSignIn} black={true}/>
         <div className='container-fluid'>
         <div class="row justify-content-center align-items-center ">
-        <form className="w-50 needs-validation my-5" style={formstyle} onSubmit={HandleSignUp}>
+        <form className="w-50 needs-validation my-5" style={formstyle}>
+            {
+                gsignin === true ?
+                <div className='row'>
+            <div className="col">
+            <DatePicker submitval={dob} updatefunc={setDOB} label={label} maxdate={currDate} mindate={minDat}/> 
+            </div>
+            <div className='col'>
+            <PhonePicker submitval={number} submitfunc={createNumber} label={"Enter Your Phone Number: "}/>
+            </div>
+            <GenderSelect gender={gender} setgender={SetGender}/>
+            </div>
+            :
+            ""
+            }
             <h3 className='display-6' style={{alignContent:'center'}}>Welcome To Sign Up Page! &#128522;</h3>
             <h5 style={{fontStyle:'italic'}} >Congratulations for creating an account!
             <br></br>
@@ -274,9 +327,11 @@ const SignUp = (props)=>{
                 <UNameInput fname={username} setfname={createName} label={"Enter A Username: "}/>
             
             <br></br>
+            
             <h5 style={{fontStyle:'italic'}} className='my-4'>
                 After creating a username, press the Enter Button and then... you are done! 
             </h5>
+            <button className='btn btn-outline-warning' onClick={HandleSignUp}>CREATE MY ACCOUNT</button>
             <h5 className='' style={{textAlign:'center'}}><u>By signing up, you agree to our Terms, Privacy Policy and <br></br>Cookies Policy.</u></h5>
         </form>
         </div>

@@ -32,7 +32,7 @@ const Post = (props) => {
   const bookmark = props.arr
 
   const mods = props.mod
-  console.log("data:", data)
+
 
   const [arr, setArr] = useState([])
 
@@ -157,14 +157,18 @@ const Post = (props) => {
     )
   }
 
+  const [upvotes,setUp] = useState(data.upvotes) 
+  const [downvotes,setDown] = useState(data.downvotes) 
+
   const HandleUpvote = () => {
     axios.post('http://localhost:4000/post/upvote', {
-
       id: data.id,
       email: email,
     }).then(() => {
-
-      window.location.reload()
+      setUp([...upvotes,email]) 
+      setDown(downvotes.filter((e)=>{
+        return e !== email 
+      }))
     }).catch((Err) => {
       console.log("Axios error")
     })
@@ -176,8 +180,10 @@ const Post = (props) => {
       id: data.id,
       email: email,
     }).then(() => {
-
-      window.location.reload()
+      setDown([...downvotes,email]) 
+      setUp(upvotes.filter((e)=>{
+        return e !== email 
+      }))
     }).catch((Err) => {
       console.log("Axios error")
     })
@@ -264,26 +270,27 @@ const Post = (props) => {
 
           <div className="col">
             {
-              data.upvotes.includes(email) === false ?
+              // data.upvotes.includes(email) === false ?
+              upvotes.includes(email) === false ?
                 <button className="btn btn-outline-success" onClick={() => {
                   HandleUpvote()
-                }}><img src={upvote} width='20' height='20' alt='op' /> {data.upvotes.length} </button>
+                }}><img src={upvote} width='20' height='20' alt='op' /> {upvotes.length} </button>
                 :
                 <button className="btn btn-outline-success" disabled>
-                  <img src={upvote} width='20' height='20' alt='op' /> {data.upvotes.length} </button>
+                  <img src={upvote} width='20' height='20' alt='op' /> {upvotes.length} </button>
             }
          
             {
-              data.downvotes.includes(email) === false ?
+              downvotes.includes(email) === false ?
 
                 <button className="btn btn-outline-danger" onClick={() => {
                   HandleDownvote()
                 }}>
-                  <img src={downvote} width='20' height='20' alt='op' /> {data.downvotes.length}
+                  <img src={downvote} width='20' height='20' alt='op' /> {downvotes.length}
                 </button>
                 :
                 <button className="btn btn-outline-danger" disabled>
-                  <img src={downvote} width='20' height='20' alt='op' /> {data.downvotes.length} </button>
+                  <img src={downvote} width='20' height='20' alt='op' /> {downvotes.length} </button>
             }
 
             {
@@ -297,7 +304,7 @@ const Post = (props) => {
 
           <div className="col-5"></div>
           <div className="col d-flex flex-row-reverse">
-            {console.log("dink: ", dink)}
+            
             {
               bookmark.includes(dink) === true || props.show === true ?
                 <button className="btn btn-outline-danger" onClick={

@@ -22,6 +22,9 @@ const EditPage = ()=>{
 
 
     const navigate = useNavigate() 
+
+    const [loaded,setLoaded] = useState(false) 
+
     let loggedin = false 
     
     const [mod,setMod] = useState(false) 
@@ -67,6 +70,7 @@ const EditPage = ()=>{
 
         CheckInItOrNot(e.followers,e.moderators).then((val)=>{
             MyEmail(val) 
+            setLoaded(true) 
         }).catch((err)=>{
             console.log("UNEXPECYE ERROR") 
             console.log(err) 
@@ -156,16 +160,6 @@ const EditPage = ()=>{
             setMod(true) 
             return true 
         }
-        // else if(list1.includes(emailid))
-        // {
-        //     navigate('/gr/' + name) 
-        //     return true 
-        // }
-        // else 
-        // {
-        //     navigate('/gr/' + name ) 
-        //     return false 
-        // }
         else 
         {
             navigate('/gr/' + name) 
@@ -239,6 +233,7 @@ const EditPage = ()=>{
 
     // Make a new component: 
     return(
+        loaded === true ?
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title} />
             <div className="container-fluid">
@@ -458,6 +453,13 @@ const EditPage = ()=>{
 
         </div>
 
+        :
+        <div className="justify-content-center align-text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading Your SubGreddiits, please wait...</p>
+        </div>
 
     )
 }

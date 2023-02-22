@@ -86,11 +86,11 @@ const ChatComponent = (props)=>{
 									<div class="text-muted small text-nowrap mt-2"
                                     style = {timedesc}>{getTime(e.date)}</div>
 								</div>
-								<div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3" style={chatdesc}>
+								<div class="flex-shrink-1 bg-info rounded py-2 px-3 mr-3" style={chatdesc}>
 									<div class="font-weight-bold mb-1" style={{
                                         fontWeight:'bold',
                                         fontSize:'15px',
-                                    }}>{e.author}</div>
+                                    }}>{e.author} on {getDate(e.date)}</div>
 									{e.message}
 								</div>
 							</div>
@@ -105,11 +105,11 @@ const ChatComponent = (props)=>{
 									<div class="text-muted small text-nowrap mt-2"
                                     style = {timedesc}>{getTime(e.date)}</div>
 								</div>
-								<div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3"  style={chatdesc}>
+								<div class="flex-shrink-1 bg-warning rounded py-2 px-3 ml-3"  style={chatdesc}>
 									<div class="font-weight-bold mb-1" style={{
                                         fontWeight:'bold',
                                         fontSize:'15px',
-                                    }}>{e.author}</div>
+                                    }}>{e.author} on {getDate(e.date)}</div>
 									{e.message}
 								</div>
 							</div>
