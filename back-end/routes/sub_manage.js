@@ -374,6 +374,15 @@ const Accept = (req,res)=>{
                 })
     
                 lmao.save()
+                let ans = req[0] 
+
+                if(!ans.followers.includes(email))
+                {
+                    ans.followers.push(email) 
+                }
+
+                ans.save()
+                console.log("done adding")
             }
             else 
             {
