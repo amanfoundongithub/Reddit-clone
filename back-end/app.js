@@ -29,10 +29,10 @@ app.use(express.json())
 app.use(cors()) 
 
 
-app.use('/signin',signup) 
-app.use('/userdata',userdata) 
-app.use('/gr',gre) 
-app.use('/post',post)  // All url redirected to post 
+app.use('/api/signin',signup) 
+app.use('/api/userdata',userdata) 
+app.use('/api/gr',gre) 
+app.use('/api/post',post)  // All url redirected to post 
 
 
 // Now create a http server
