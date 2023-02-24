@@ -11,7 +11,6 @@ let router = express.Router()
 
 require('dotenv').config() 
 
-dbConnect() 
 router.use(express.json());
 
 const user = mongoose.model("User",userSchema) 
@@ -154,6 +153,7 @@ const getId = async (username,param)=>{
     return {
         id: doc._id,
         email:doc.email,
+        username : doc.username
     }
     }
 
@@ -176,10 +176,11 @@ router.route('/signin').post((req,res,next)=>{
         }
 
         getId(req.body.username,req.body.google).then((lol)=>{
+            const state = req.body.google === true ? lol.username :req.body.username
             object2 = {
                 id:lol.id,
                 email:lol.email,
-                username: req.body.username,
+                username: state,
             
             }
 

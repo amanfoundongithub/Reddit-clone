@@ -9,7 +9,6 @@ require('dotenv').config()
 
 const router = express.Router()
 
-dbConnect() 
 router.use(express.json());
 
 const user = mongoose.model("User",userSchema) 
@@ -35,9 +34,9 @@ const authenticateToken = (req)=>{
             result = true 
         }) 
 
-
         if(result)
         {
+             
             return {
                 message:'OK',
                 id:req.newit.id,
@@ -187,6 +186,7 @@ router.route('/find').post((req,res,next)=>{
     user.findOne({
         username:username,
     }).then((val)=>{
+        console.log("Result",result) 
         if(result.message === 'OK')
         {
             // Means we have already an account so check if the username matches or not
@@ -485,6 +485,7 @@ router.route('/chatroom').post((req,res,next)=>{
             let images = []
 
             const asyncprofile = async()=>{
+                
             for(let i = 0 ; i < out.length ; i++)
             {
                 let e = out[i] 

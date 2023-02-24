@@ -358,11 +358,14 @@ const Accept = (req,res)=>{
         stat.find({
             name: name,
         }).then((val) => {
+            // 
+            console.log("val of stat: ",val) 
             const date = new Date() 
             const req = val.filter((e) => {
                 let dateit = new Date(e.dateOfCreation)
                 return dateit.getFullYear() === date.getFullYear() && dateit.getMonth() === date.getMonth() && dateit.getDate() === date.getDate()
             })
+
             if (req.length === 0) {
                  
                 const lmao = new stat({
@@ -381,7 +384,8 @@ const Accept = (req,res)=>{
                 {
                     ans.followers.push(email) 
                 }
-    
+
+                ans.save()
                 console.log("done adding") 
             }
     
@@ -498,7 +502,8 @@ const UnHandleFollow = async (req,res)=>{
                         {
                             ans.followers.splice(ans.followers.indexOf(email),1) 
                         }
-            
+
+                        ans.save() 
                         console.log("done adding") 
                     }
             
@@ -540,9 +545,6 @@ const HandleList = async (req,res)=>{
     const list1 = req.body.list
 
     let output = []
-
-
-   
 
     console.log("Start") 
     const loopsasync = async () => {
@@ -742,7 +744,7 @@ router.route('/search').post((req,res,next)=>{
         {
             for(let i = 0 ; i <val.length ; i++)
         {
-            console.log("truth value :" ,listtag.every(e=> val[i].tags.includes(e)))
+            
             if(listtag.every(e=> val[i].tags.includes(e)))
             {
                 updated.push(val[i])  
