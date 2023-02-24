@@ -20,6 +20,7 @@ const getDate = (date) => {
 const Post = (props) => {
 
   const data = props.data
+ 
 
   let sub = null
   if (props.sub != undefined) {
@@ -49,7 +50,7 @@ const Post = (props) => {
 
 
 
-  axios.post('http://localhost:4000/post/getcomment', {
+  axios.post('http://localhost:4000/api/post/getcomment', {
     list: data.comments,
   }).then((res) => {
     Update(res.data.output).then(() => {
@@ -74,7 +75,7 @@ const Post = (props) => {
 
 
     const HandleComment = () => {
-      axios.post('http://localhost:4000/post/comment', {
+      axios.post('http://localhost:4000/api/post/comment', {
         email: email,
         body: bodyofcomment,
         id: data.id,
@@ -134,18 +135,26 @@ const Post = (props) => {
                       )
                     })
                 }
-
+                { 
+                props.follower === true ?
                 <form onSubmit={HandleComment}>
                   <div class="input-group mb-3">
-                    {/* <span class="input-group-text" id="basic-addon1">Comment :</span> */}
                     <input type="text" class="form-control" placeholder="Add comment here" aria-label="Username" aria-describedby="basic-addon1" value={bodyofcomment} onChange={(e) => { setBody(e.target.value) }} />
                   </div>
-
+                  
                   <button className="btn btn-outline-warning" type="submit" data-bs-dismiss="modal">
                     Add Comment
                   </button>
+
                 </form>
+                :
+
+                <p style={{
+                  fontWeight:'bold'
+                }}>SORRY, BUT YOU ARE NOT ALLOWED TO COMMENT HERE.</p>
+  }
               </div>
+    
 
 
             </div>
@@ -161,7 +170,7 @@ const Post = (props) => {
   const [downvotes,setDown] = useState(data.downvotes) 
 
   const HandleUpvote = () => {
-    axios.post('http://localhost:4000/post/upvote', {
+    axios.post('http://localhost:4000/api/post/upvote', {
       id: data.id,
       email: email,
     }).then(() => {
@@ -175,7 +184,7 @@ const Post = (props) => {
   }
 
   const HandleDownvote = () => {
-    axios.post('http://localhost:4000/post/downvote', {
+    axios.post('http://localhost:4000/api/post/downvote', {
 
       id: data.id,
       email: email,
@@ -190,7 +199,7 @@ const Post = (props) => {
   }
 
   const HandleBookmark = () => {
-    axios.post('http://localhost:4000/post/bookmark', {
+    axios.post('http://localhost:4000/api/post/bookmark', {
       token: 'BEARER ' + window.localStorage.getItem('myaccesstoken'),
       id: data.id,
     }).then((res) => {
@@ -202,7 +211,7 @@ const Post = (props) => {
   }
 
   const HandleRemoveBookmark = () => {
-    axios.post('http://localhost:4000/post/delbookmark', {
+    axios.post('http://localhost:4000/api/post/delbookmark', {
       token: 'BEARER ' + window.localStorage.getItem('myaccesstoken'),
       id: data.id,
     }).then((res) => {
@@ -222,7 +231,7 @@ const Post = (props) => {
       alert('You cannot report a moderator!')
       return
     }
-    axios.post('http://localhost:4000/post/report', {
+    axios.post('http://localhost:4000/api/post/report', {
       reporter: email,
       reported: data.email,
       concern: 'porn',

@@ -4,8 +4,6 @@ import NavBar from "../Components/Navbar/NavBar"
 import searchit from '../Components/Images/search.png'
 
 
-
-
 const HomePage = ()=>{
 
     // searched word to be on the MongoDB 
@@ -14,9 +12,11 @@ const HomePage = ()=>{
     // Search list of the MongoDB 
     const [list,setList] = useState([])
 
+    
+
     const HandleInput = ()=>{
         
-        axios.post('http://localhost:4000/gr/search',{
+        axios.post('http://localhost:4000/api/gr/search',{
             search:search,
             list:listtag,
         }).then((res)=>{
@@ -29,7 +29,7 @@ const HomePage = ()=>{
 
     // Now, once loaded, we need to add the stats of the 
     // stats page 
-    axios.post('http://localhost:4000/gr/statcreate',{
+    axios.post('http://localhost:4000/api/gr/statcreate',{
         
     }).then(()=>{
         console.log("Done")
@@ -39,27 +39,68 @@ const HomePage = ()=>{
 
     // CHECK IF NAME IS SORTED OR NOT
     const [name,sortName] = useState(true) 
+    const [name2,setName2] = useState(true) 
     const [date,setDate]  = useState(true) 
     const [follower,setFollower] = useState(true) 
     const [listtag,setListTag] = useState([]) 
     const [tag,setTag] = useState('')
 
     // FOR NAVBAR PARAMETER ARE DISPLAYED HERE
+    var title = "Other Profile" 
+
     const listofmenu = [
         {
             title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
-            href:'/signin',
-        },
-        {
-            title: 'Profile',
-            href:'/profile',
-        },
 
     ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
+            href:'/profile',
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
+            title:'My SubGreddiits',
+            href:'/mysg',
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
+            href:'/profile',
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     return(
         
@@ -112,7 +153,22 @@ const HomePage = ()=>{
                                 }
                             }} />
                             <label class="form-check-label" htmlFor="#name-check">
-                                On The Basis Of Name
+                                On The Basis Of Name (Ascending) 
+                            </label>
+                        </div>
+
+                        <div class="form-check col">
+                            <input class="form-check-input" type="checkbox" id="name-check-1" value={name2} onChange={(e) => {
+                                setName2(!name2); 
+                                if (name2 === true) {
+                                    setList(list.sort((a, b) => {
+                                        let compare = a.name.localeCompare(b.name)
+                                        return -1*compare 
+                                    }))
+                                }
+                            }} />
+                            <label class="form-check-label" htmlFor="#name-check-1">
+                                On The Basis Of Name (Descending) 
                             </label>
                         </div>
 
@@ -214,25 +270,57 @@ const HomePage = ()=>{
    }
 </div>
 </div>
+
             {
                // Displays the search results 
                 <div>
                     <br></br>
                     <h3 style={{textAlign:'left'}}>Search Results: </h3>
-                    {
-                        list.map((val,index)=>{
-                            return(
-                                <div id={index}>
-                                    <img src={val.profileImageURL} width='30' height='30' className="rounded-circle"></img>
-                                    &nbsp;
-                                    <a href={'/gr/' + val.name} style={{
-                                textDecoration:'none',
-                                color:'black' 
-                            }}>{val.name}</a>
-                                </div>
-                            )
-                        })
-                    }
+                                    
+                                    {
+                                        list.map((val,index)=>{
+                                            return(
+                                                
+                                                <div class="card my-2" style={{
+                                                    width:'70%',
+                                                    
+                                                }} key={index} >
+                                                    <img src={val.coverImageURL} class="card-img-top" alt="..." width='200' height='200'/>
+                                                        <div class="card-body">
+                                                            <div class="card-title">
+                                                            <img src={val.profileImageURL} width='40' height='40' className="rounded-circle"></img>
+                                                            &nbsp;
+                                                            <a href={'/gr/' + val.name} style={{
+                                                                textDecoration: 'none',
+                                                                color: 'black',
+                                                                fontWeight:'bold',
+                                                            }}>{val.name}</a>
+                                                            </div>
+                                                            <div class="card-text" style={{textAlign:'left'}}>
+                                                                <span style={{
+                                                                    fontWeight: 'bold' 
+                                                                }}>Description: </span>
+                                                                <span> {val.description}</span>
+                                                                <br></br>
+                                                                <span style={{
+                                                                    fontWeight: 'bold' 
+                                                                }}>Followers: </span>
+                                                                <span> {val.followers.length + val.moderators.length}</span>
+                                                                <br></br>
+                                                                <span style={{
+                                                                    fontWeight: 'bold' 
+                                                                }}>Posts: </span>
+                                                                <span> {val.posts.length}</span>
+                                                            </div>
+                                                        </div>
+                                                </div>
+                                                
+                                            )
+                                        })
+                                    }
+                                    
+
+                               
                 </div>
                 
             }

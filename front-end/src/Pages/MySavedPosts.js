@@ -35,20 +35,35 @@ const MySavedOnes = ()=>{
             title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
-            href:'/signin',
-        },
-        {
-            title: 'Profile',
-            href:'/profile',
-        },
-        {
-            title:'My SubGreddiits',
-            href:'/mysg'
-        }
 
     ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
+            href:'/profile',
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
+            title:'My SubGreddiits',
+            href:'/mysg',
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     const [details,setDetails] = useState({
 
@@ -81,7 +96,7 @@ const MySavedOnes = ()=>{
 
         // Now set an axios request to get the usernames
     
-        axios.post('http://localhost:4000/post/bookmarkit',{
+        axios.post('http://localhost:4000/api/post/bookmarkit',{
             list:e.savedPosts, 
             lol:true,
         }).then((res)=>{
@@ -97,7 +112,7 @@ const MySavedOnes = ()=>{
 
     if(details.email === '')
     {
-    axios.post('http://localhost:4000/userdata/profile',{
+    axios.post('http://localhost:4000/api/userdata/profile',{
         id:window.localStorage.getItem('current-username'),
         token:"BEARER "+window.localStorage.getItem('myaccesstoken')
     }).then((res)=>{
@@ -118,7 +133,7 @@ const MySavedOnes = ()=>{
         {
             return 
         }
-        axios.post('http://localhost:4000/gr/delete',{
+        axios.post('http://localhost:4000/api/gr/delete',{
             name:username, 
         }).then((res)=>{
             window.location.reload() 

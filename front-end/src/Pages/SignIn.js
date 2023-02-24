@@ -61,7 +61,7 @@ const SignIn = (props)=>{
 
 
         // Send data via axios to verify and get the id of the person 
-        axios.post('http://localhost:4000/signin/signin',{
+        axios.post('http://localhost:4000/api/signin/signin',{
             username:email,
             password:pass, 
         }).then((res)=>{
@@ -98,7 +98,7 @@ const SignIn = (props)=>{
 
             if(datanew.isNewUser === false)
             {
-                axios.post('http://localhost:4000/signin/signin', {
+                axios.post('http://localhost:4000/api/signin/signin', {
                     username: datanew.profile.email,
                     google: true,
                 }).then((res) => {

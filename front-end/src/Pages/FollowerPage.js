@@ -70,7 +70,7 @@ const FollowerPage = ()=>{
         setProf(e.profileImageURL)
         setCovURL(e.coverImageURL) 
 
-        axios.post('http://localhost:4000/gr/getdata',{
+        axios.post('http://localhost:4000/api/gr/getdata',{
         list:e.followers,  
     }).then((response)=>{
 
@@ -80,7 +80,7 @@ const FollowerPage = ()=>{
         console.log("AXIOS ERROR")
     })
 
-        axios.post('http://localhost:4000/gr/getdata2',{
+        axios.post('http://localhost:4000/api/gr/getdata2',{
             list:e.pending,
         }).then((response)=>{
             setList2(response.data.usernames)
@@ -88,7 +88,7 @@ const FollowerPage = ()=>{
             console.log("AXIOS ERROR")
         })
     
-        axios.post('http://localhost:4000/gr/getdata',{
+        axios.post('http://localhost:4000/api/gr/getdata',{
             list:e.banned,
         }).then((response)=>{
             setList3(response.data.usernames)
@@ -108,7 +108,7 @@ const FollowerPage = ()=>{
     }
 
     // var count = 0 
-        axios.post('http://localhost:4000/gr/page',{
+        axios.post('http://localhost:4000/api/gr/page',{
         name:name, 
     }).then((res)=>{
 
@@ -126,22 +126,42 @@ const FollowerPage = ()=>{
     })
 
 
-    var title = "My Profile" 
+    var title = "Greddiit" 
 
-    var listofmenu = [
+    const listofmenu = [
         {
-            title:'Home',
+            title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
+
+    ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
             href:'/profile',
-        },
-        {
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
             title:'My SubGreddiits',
             href:'/mysg',
-        }
-    ]
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     if(loggedin === false)
     {
@@ -170,7 +190,7 @@ const FollowerPage = ()=>{
         }
 
         // Logged in 
-        let result = await axios.post('http://localhost:4000/userdata/profile',{
+        let result = await axios.post('http://localhost:4000/api/userdata/profile',{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken')
         })
 
@@ -217,7 +237,7 @@ const FollowerPage = ()=>{
 
     const EditGreddiit = async ()=>{
 
-        axios.post('http://localhost:4000/gr/edit',{
+        axios.post('http://localhost:4000/api/gr/edit',{
             name: details.name, 
             desc:editdesc, 
             profile:profURL,
@@ -248,7 +268,7 @@ const FollowerPage = ()=>{
         let answer = window.prompt('Last Step: Tell us a good reason why should you join the SubGreddiit?',
         'I want to join this subgreddiit') 
 
-        axios.post('http://localhost:4000/gr/follow',{
+        axios.post('http://localhost:4000/api/gr/follow',{
             name:details.name, 
             email:em,
             reason:answer, 
@@ -263,7 +283,7 @@ const FollowerPage = ()=>{
 
     const UnFollow = ()=>{
 
-        axios.post('http://localhost:4000/gr/unfollow',{
+        axios.post('http://localhost:4000/api/gr/unfollow',{
             name:details.name, 
             email:em,
         }).then((res)=>{
@@ -411,7 +431,7 @@ const FollowerPage = ()=>{
                                             type='submit'
                                             onClick={
                                                 ()=>{
-                                                    axios.post('http://localhost:4000/gr/accept',{
+                                                    axios.post('http://localhost:4000/api/gr/accept',{
                                                         name:details.name, 
                                                         username:e.username, 
                                                         reason:e.reason, 
@@ -431,7 +451,7 @@ const FollowerPage = ()=>{
                                             type='submit'
                                             onClick={
                                                 ()=>{
-                                                    axios.post('http://localhost:4000/gr/reject',{
+                                                    axios.post('http://localhost:4000/api/gr/reject',{
                                                         name:details.name, 
                                                         username:e.username, 
                                                         reason:e.reason, 

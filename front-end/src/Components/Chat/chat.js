@@ -26,7 +26,7 @@ const ChatComponent = (props)=>{
 
     const images = props.images 
 
-    axios.post('http://localhost:4000/userdata/preparechat',{
+    axios.post('http://localhost:4000/api/userdata/preparechat',{
         room: room,
     }).then((res)=>{
         sendRes(res.data.chats) 

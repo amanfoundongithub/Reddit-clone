@@ -25,7 +25,7 @@ const Modal = ()=>{
     const HandleSubmit = ()=>{
         let cute=  name.trim()
         let cute2 = desc.trim()
-        axios.post('http://localhost:4000/gr/create',{
+        axios.post('http://localhost:4000/api/gr/create',{
             token:'BEARER '+ window.localStorage.getItem('myaccesstoken'),
             name:cute, 
             desc:cute2, 
@@ -137,16 +137,35 @@ const MySubGreddits = ()=>{
             title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
-            href:'/signin',
-        },
-        {
-            title: 'Profile',
-            href:'/profile',
-        },
 
     ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
+            href:'/profile',
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
+            title:'My SubGreddiits',
+            href:'/mysg',
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     const [details,setDetails] = useState({
 
@@ -174,7 +193,7 @@ const MySubGreddits = ()=>{
         setDetails(e) 
         
         // Now set an axios request to get the usernames
-        axios.post('http://localhost:4000/gr/get',{
+        axios.post('http://localhost:4000/api/gr/get',{
             list:e.created, 
         }).then((res)=>{
             setArr(res.data.list) 
@@ -187,7 +206,7 @@ const MySubGreddits = ()=>{
 
     if(details.email === '')
     {
-    axios.post('http://localhost:4000/userdata/profile',{
+    axios.post('http://localhost:4000/api/userdata/profile',{
         id:window.localStorage.getItem('current-username'),
         token:"BEARER "+window.localStorage.getItem('myaccesstoken')
     }).then((res)=>{
@@ -208,7 +227,7 @@ const MySubGreddits = ()=>{
         {
             return 
         }
-        axios.post('http://localhost:4000/gr/delete',{
+        axios.post('http://localhost:4000/api/gr/delete',{
             name:username, 
         }).then((res)=>{
             window.location.reload() 

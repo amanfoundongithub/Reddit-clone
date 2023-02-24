@@ -9,7 +9,7 @@ const socket = io.connect('http://localhost:4001')
 const MessagePage = (props)=>{
 
     const [images,setImages] = useState([]) 
-    axios.post('http://localhost:4000/userdata/chatroom',{
+    axios.post('http://localhost:4000/api/userdata/chatroom',{
         to: props.to,
         from: props.from,
     }).then((res)=>{

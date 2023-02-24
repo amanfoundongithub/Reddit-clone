@@ -40,22 +40,43 @@ const ViewProfile = ()=>{
 
     var arr = [0]
 
-    var title = "My Profile" 
+    var title = "Other Profile" 
 
-    var listofmenu = [
+    const listofmenu = [
         {
-            title:'Home',
+            title: 'Home',
             href:'/',
         },
-    ]
-    
 
-    if(window.localStorage.getItem("current-username"))
+    ]
+
+    if(window.localStorage.getItem('current-username'))
     {
-        listofmenu.push( {
-        title:'Logout',
-        href:'/profile',
-    }) }
+        listofmenu.push({
+            title:'Profile',
+            href:'/profile',
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
+            title:'My SubGreddiits',
+            href:'/mysg',
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
+
     
     const navigate = useNavigate() 
 
@@ -85,7 +106,8 @@ const ViewProfile = ()=>{
     if(arr[0] === 0)
     {
         if(details.name.firstname.length === 0){
-        axios.post('http://localhost:4000/userdata/find',{
+        
+        axios.post('http://localhost:4000/api/userdata/find',{
         username:username,
         token:'BEARER '+window.localStorage.getItem('myaccesstoken') 
     }).then((res)=>{
@@ -102,6 +124,8 @@ const ViewProfile = ()=>{
             
             const message = res.data.message 
 
+            console.log("Result: ",result)
+            console.log("message: ",message) 
             if(result === null)
             {
                 alert('No such account exists!')
@@ -115,7 +139,7 @@ const ViewProfile = ()=>{
                     {
                         userEm(res.data.em)
                     } 
-                    axios.post('http://localhost:4000/userdata/usernames',{
+                    axios.post('http://localhost:4000/api/userdata/usernames',{
                     list1:res.data.obtained.followers,
                     list2:res.data.obtained.following,
                 }).then((response)=>{
@@ -150,7 +174,7 @@ const ViewProfile = ()=>{
     
     const [us,setUs] = useState('') 
     if(window.localStorage.getItem('myaccesstoken')){
-    axios.post('http://localhost:4000/userdata/check',{
+    axios.post('http://localhost:4000/api/userdata/check',{
         token:'BEARER '+window.localStorage.getItem('myaccesstoken'),
         email:details.email,
     }).then((res)=>{
@@ -239,7 +263,7 @@ const ViewProfile = ()=>{
         }
     // Handles follow request 
     const HandleFollow = ()=>{
-        axios.post('http://localhost:4000/userdata/follow',{
+        axios.post('http://localhost:4000/api/userdata/follow',{
             token:'BEARER '+window.localStorage.getItem('myaccesstoken'),
             email:details.email,
         }).then((message)=>{
@@ -254,7 +278,7 @@ const ViewProfile = ()=>{
     }
 
     const HandleUnfollow = ()=>{
-        axios.post('http://localhost:4000/userdata/unfollow',{
+        axios.post('http://localhost:4000/api/userdata/unfollow',{
             token:'BEARER '+window.localStorage.getItem('myaccesstoken'),
             email:details.email,
         }).then((message)=>{

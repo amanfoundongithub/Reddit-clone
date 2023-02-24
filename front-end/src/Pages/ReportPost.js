@@ -89,7 +89,7 @@ const ReportedPostPage = ()=>{
     }
 
     // var count = 0 
-        axios.post('http://localhost:4000/gr/page',{
+        axios.post('http://localhost:4000/api/gr/page',{
         name:name, 
     }).then((res)=>{
 
@@ -107,22 +107,42 @@ const ReportedPostPage = ()=>{
     })
 
 
-    var title = "My Profile" 
+    var title = "My SubGreddiit" 
 
-    var listofmenu = [
+    const listofmenu = [
         {
-            title:'Home',
+            title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
+
+    ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
             href:'/profile',
-        },
-        {
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
             title:'My SubGreddiits',
             href:'/mysg',
-        }
-    ]
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     if(loggedin === false)
     {
@@ -152,7 +172,7 @@ const ReportedPostPage = ()=>{
         }
 
         // Logged in 
-        let result = await axios.post('http://localhost:4000/userdata/profile',{
+        let result = await axios.post('http://localhost:4000/api/userdata/profile',{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken')
         })
 
@@ -165,7 +185,7 @@ const ReportedPostPage = ()=>{
 
         
 
-        let result2 = await axios.post('http://localhost:4000/gr/usernameofreports',{
+        let result2 = await axios.post('http://localhost:4000/api/gr/usernameofreports',{
             list1:list5, 
         })
 
@@ -214,7 +234,7 @@ const ReportedPostPage = ()=>{
         let answer = window.prompt('Last Step: Tell us a good reason why should you join the SubGreddiit?',
         'I want to join this subgreddiit') 
 
-        axios.post('http://localhost:4000/gr/follow',{
+        axios.post('http://localhost:4000/api/gr/follow',{
             name:details.name, 
             email:em,
             reason:answer, 
@@ -229,7 +249,7 @@ const ReportedPostPage = ()=>{
 
     const UnFollow = ()=>{
 
-        axios.post('http://localhost:4000/gr/unfollow',{
+        axios.post('http://localhost:4000/api/gr/unfollow',{
             name:details.name, 
             email:em,
         }).then((res)=>{
@@ -246,7 +266,7 @@ const ReportedPostPage = ()=>{
      
     let det = details.banned.includes(em) 
 
-    axios.post('http://localhost:4000/gr/usernameofreports',{
+    axios.post('http://localhost:4000/api/gr/usernameofreports',{
             list1: details.reports,  
         }).then((val)=>{
             update(val.data.out) 
@@ -256,7 +276,7 @@ const ReportedPostPage = ()=>{
 
     const DeleteThePost = (id,id2)=>{
         console.log("id: ",id) 
-        axios.post('http://localhost:4000/post/deletepost',{
+        axios.post('http://localhost:4000/api/post/deletepost',{
             id: id,
             report:id2, 
         }).then((res)=>{
@@ -275,7 +295,7 @@ const ReportedPostPage = ()=>{
 
     const BlockUser = (e)=>{
         console.log("em: ",e)
-        axios.post('http://localhost:4000/gr/unfollow',{
+        axios.post('http://localhost:4000/api/gr/unfollow',{
             name: name, 
             email: e,
         }).then((res)=>{
@@ -321,7 +341,7 @@ const ReportedPostPage = ()=>{
             }
             setArr(e) 
         }
-        axios.post('http://localhost:4000/post/reportdata',{
+        axios.post('http://localhost:4000/api/post/reportdata',{
             id:post,
         }).then((res)=>{
             if(res.data.data === undefined)
@@ -366,6 +386,7 @@ const ReportedPostPage = ()=>{
 
     return(
         loaded === true ?
+        details.moderators.includes(em) === true ? 
         <div className="container-fluid">
             <NavBar isdropdown={false} issearch={false} listofmenu={listofmenu} title={title}/>
             <div className="container-fluid">
@@ -550,7 +571,7 @@ const ReportedPostPage = ()=>{
                                                 </button>
                                                 }
                                                 <button className="btn btn-outline-info" onClick={()=>{
-                                                    axios.post('http://localhost:4000/post/ignore',{
+                                                    axios.post('http://localhost:4000/api/post/ignore',{
                                                         post2:e._id,
                                                         post:e.postID,
                                                     }).then(()=>{
@@ -641,6 +662,10 @@ const ReportedPostPage = ()=>{
                 </div>
                 </div>
                 
+            </div>
+            :
+            <div>
+                404 ACCESS DENIED
             </div>
             :
             <div className="justify-content-center align-text-center">

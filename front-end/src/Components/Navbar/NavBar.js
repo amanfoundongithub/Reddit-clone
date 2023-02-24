@@ -2,6 +2,14 @@ import React from "react"
 import logo from '../Images/logo.png'
 import { useNavigate } from "react-router-dom"
 
+// Icons
+import HomeIcon from '@mui/icons-material/Home';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MailOutlineOutlinedIcon from '@mui/icons-material/MailOutlineOutlined';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
+
 const LogOut = ()=>{
   // console.log("The bytton is pressed")
   window.localStorage.removeItem('current-username') 
@@ -29,6 +37,19 @@ const NavBar = (props)=>{
       color:colorchoose,
     }
 
+    var listoficons = []
+
+    for(let i = 0 ; i < listofmenu.length ; i++)
+    {
+      let tag = listofmenu[i] 
+
+      if(tag.title === 'Home')
+      {
+          listoficons.push('home') 
+      }
+      
+    }
+
 
     return(
       <nav className="navbar navbar-expand-lg" >
@@ -40,17 +61,38 @@ const NavBar = (props)=>{
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0" style={stile}>
-            {listofmenu.map((item)=>{
+            {listofmenu.map((item,index)=>{
               if(item.title === 'Logout')
               {
                 return <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href={item.href} onClick={LogOut} style={stile}>{item.title}</a>
+                  
+                <a className="nav-link active" aria-current="page" href={item.href} onClick={LogOut} style={stile}><LogoutIcon /> {item.title}</a>
               </li>
               }
               
               return(
                 <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href={item.href} style={stile}>{item.title}</a>
+                  
+              <a className="nav-link active" aria-current="page" href={item.href} style={stile}>
+              {
+                  item.title === 'Home'? 
+                  <HomeIcon />
+                  :
+                  item.title === 'Profile' ?
+                  <AccountCircleIcon />
+                  :
+                  item.title === 'My Saved Posts'?
+                  <MailOutlineOutlinedIcon />
+                  :
+                  item.title === 'My SubGreddiits' ?
+                  <PeopleAltOutlinedIcon />
+                  :
+                  item.title === 'Log In' ?
+                  <LoginOutlinedIcon />
+                  :
+                  ""
+                }
+                {item.title}</a>
             </li>
               )
             })}

@@ -130,7 +130,7 @@ const SignUp = (props)=>{
             return
         }
 
-        axios.post('http://localhost:4000/signin/verify',{
+        axios.post('http://localhost:4000/api/signin/verify',{
             email:email
         }).then((res)=>{
             console.log("response: ",res) 
@@ -168,7 +168,7 @@ const SignUp = (props)=>{
             return 
         }
 
-        axios.post('http://localhost:4000/signin/create',{
+        axios.post('http://localhost:4000/api/signin/create',{
             name:{
                 firstname:fname,
                 lastname:lname,

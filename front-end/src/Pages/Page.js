@@ -76,7 +76,7 @@ const Page = ()=>{
     }
 
     // var count = 0 
-        axios.post('http://localhost:4000/gr/page',{
+        axios.post('http://localhost:4000/api/gr/page',{
         name:name, 
     }).then((res)=>{
 
@@ -95,22 +95,42 @@ const Page = ()=>{
     })
 
 
-    var title = "My Profile" 
+    var title = "SubGreddiit" 
 
-    var listofmenu = [
+    const listofmenu = [
         {
-            title:'Home',
+            title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
+
+    ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
             href:'/profile',
-        },
-        {
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
             title:'My SubGreddiits',
             href:'/mysg',
-        }
-    ]
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     if(loggedin === false)
     {
@@ -136,7 +156,7 @@ const Page = ()=>{
     const CheckInItOrNot = async (list1,list2,list3,list4)=>{
         
 
-        let result2 = await axios.post('http://localhost:4000/post/getdata',{
+        let result2 = await axios.post('http://localhost:4000/api/post/getdata',{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken'),
             body:list3
         })
@@ -149,13 +169,13 @@ const Page = ()=>{
             return false 
         }
 
-        let result = await axios.post('http://localhost:4000/userdata/profile',{
+        let result = await axios.post('http://localhost:4000/api/userdata/profile',{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken')
         })
         let emailid = result.data.message.email 
 
         
-        let added = await axios.post('http://localhost:4000/gr/visit',{
+        let added = await axios.post('http://localhost:4000/api/gr/visit',{
             emailid : emailid, 
             name: name,
         })
@@ -205,7 +225,7 @@ const Page = ()=>{
         let answer = window.prompt('Last Step: Tell us a good reason why should you join the SubGreddiit?',
         'I want to join this subgreddiit') 
 
-        axios.post('http://localhost:4000/gr/follow',{
+        axios.post('http://localhost:4000/api/gr/follow',{
             name:details.name, 
             email:em,
             reason:answer, 
@@ -219,7 +239,7 @@ const Page = ()=>{
 
     const UnFollow = ()=>{
 
-        axios.post('http://localhost:4000/gr/unfollow',{
+        axios.post('http://localhost:4000/api/gr/unfollow',{
             name:details.name, 
             email:em,
         }).then((res)=>{
@@ -341,7 +361,7 @@ const Page = ()=>{
                 {
                     return 
                 }
-                axios.post('http://localhost:4000/post/create',{
+                axios.post('http://localhost:4000/api/post/create',{
                     name:name, 
                     title:title, 
                     body:bod, 
@@ -505,8 +525,11 @@ const Page = ()=>{
                                             {
                                                 console.log("arr: ",arr) 
                                             }
+                                            {
+                                                console.log("email",email) 
+                                            }
                                             <Post data={url[index]} current={em} arr={arr} sub={name}
-                                            mod={details.moderators}/>
+                                            mod={details.moderators} follower={email || details.moderators.includes(em)}/> 
                                             <br></br>
                                             </div>
                                         )

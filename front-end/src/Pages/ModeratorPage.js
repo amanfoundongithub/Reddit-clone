@@ -66,7 +66,7 @@ const ModPage = ()=>{
         setProf(e.profileImageURL)
         setCovURL(e.coverImageURL) 
         console.log("e.mod:",e.moderators) 
-        axios.post('http://localhost:4000/gr/getdata',{
+        axios.post('http://localhost:4000/api/gr/getdata',{
         list2:e.pending,
         list:e.moderators,  
     }).then((response)=>{
@@ -88,7 +88,7 @@ const ModPage = ()=>{
     }
 
     // var count = 0 
-        axios.post('http://localhost:4000/gr/page',{
+        axios.post('http://localhost:4000/api/gr/page',{
         name:name, 
     }).then((res)=>{
 
@@ -106,22 +106,42 @@ const ModPage = ()=>{
     })
 
 
-    var title = "My Profile" 
+    var title = "SubGreddiit" 
 
-    var listofmenu = [
+    const listofmenu = [
         {
-            title:'Home',
+            title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
+
+    ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
             href:'/profile',
-        },
-        {
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
             title:'My SubGreddiits',
             href:'/mysg',
-        }
-    ]
+        })
+        listofmenu.push({
+            title:'My Saved Posts',
+            href:'/mysaved',
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     if(loggedin === false)
     {
@@ -150,7 +170,7 @@ const ModPage = ()=>{
         }
 
         // Logged in 
-        let result = await axios.post('http://localhost:4000/userdata/profile',{
+        let result = await axios.post('http://localhost:4000/api/userdata/profile',{
             token:"BEARER "+window.localStorage.getItem('myaccesstoken')
         })
 
@@ -202,7 +222,7 @@ const ModPage = ()=>{
         let answer = window.prompt('Last Step: Tell us a good reason why should you join the SubGreddiit?',
         'I want to join this subgreddiit') 
 
-        axios.post('http://localhost:4000/gr/follow',{
+        axios.post('http://localhost:4000/api/gr/follow',{
             name:details.name, 
             email:em,
             reason:answer, 
@@ -218,7 +238,7 @@ const ModPage = ()=>{
 
     const UnFollow = ()=>{
 
-        axios.post('http://localhost:4000/gr/unfollow',{
+        axios.post('http://localhost:4000/api/gr/unfollow',{
             name:details.name, 
             email:em,
         }).then((res)=>{

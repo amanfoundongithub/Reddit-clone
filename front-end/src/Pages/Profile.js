@@ -43,24 +43,40 @@ const Profile = ()=>{
 
     var title = "My Profile" 
 
-    var listofmenu = [
+    const listofmenu = [
         {
-            title:'Home',
+            title: 'Home',
             href:'/',
         },
-        {
-            title:'Logout',
+
+    ]
+
+    if(window.localStorage.getItem('current-username'))
+    {
+        listofmenu.push({
+            title:'Profile',
             href:'/profile',
-        },
-        {
+        })
+        listofmenu.push({
+            title:'Logout',
+            href:'/signin',
+        })
+        listofmenu.push({
             title:'My SubGreddiits',
             href:'/mysg',
-        },
-        {
+        })
+        listofmenu.push({
             title:'My Saved Posts',
             href:'/mysaved',
-        },
-    ]
+        })
+    }
+    else 
+    {
+        listofmenu.push({
+            title:'Log In',
+            href:'/signin',
+        })
+    }
 
     // DETAILS 
     const [details,setDetails] = useState({
@@ -110,14 +126,14 @@ const Profile = ()=>{
     
 
         // if not return details
-        axios.post('http://localhost:4000/userdata/profile',{
+        axios.post('http://localhost:4000/api/userdata/profile',{
             id:id,
             token:"BEARER "+window.localStorage.getItem('myaccesstoken')
         }).then((res)=>{
             // console.log("res: ",res.data.message)
             if(res.data.message != null)
             {
-                axios.post('http://localhost:4000/userdata/usernames',{
+                axios.post('http://localhost:4000/api/userdata/usernames',{
                     list1:res.data.message.followers,
                     list2:res.data.message.following,
                 }).then((response)=>{
@@ -152,7 +168,7 @@ const Profile = ()=>{
         }
 
         // Handles edits 
-        axios.post('http://localhost:4000/userdata/editprofile',{
+        axios.post('http://localhost:4000/api/userdata/editprofile',{
             id:id, 
             token:'BEARER '+ window.localStorage.getItem('myaccesstoken'),
             username: newusername,
@@ -183,7 +199,7 @@ const Profile = ()=>{
 
         const RemoveFollower = (emailoffollower) => {
 
-            axios.post('http://localhost:4000/userdata/removefollower', {
+            axios.post('http://localhost:4000/api/userdata/removefollower', {
                 follower: emailoffollower,
                 email: details.email,
             }).then((res) => {
