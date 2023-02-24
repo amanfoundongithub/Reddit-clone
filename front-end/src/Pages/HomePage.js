@@ -83,24 +83,7 @@ const HomePage = ()=>{
         })
     }
 
-    if(window.localStorage.getItem('current-username'))
-    {
-        listofmenu.push({
-            title:'Profile',
-            href:'/profile',
-        })
-        listofmenu.push({
-            title:'Logout',
-            href:'/signin',
-        })
-    }
-    else 
-    {
-        listofmenu.push({
-            title:'Log In',
-            href:'/signin',
-        })
-    }
+   
 
     return(
         
